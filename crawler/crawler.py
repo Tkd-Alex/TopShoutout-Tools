@@ -22,8 +22,9 @@ for user in usernames:
     if res.status_code == 200:
         json = res.json()['user']
         # If user is private media array is empty
-        print("Username: {}, Fullname: {}".format(json['username'].encode('utf-8'), json['full_name'].encode('utf-8')))
+        print("Username: {}".format(json['username'].encode('utf-8')))
         print("Follower count: {}".format(json['followed_by']['count']))
+        imgcounter = 0
         for media in json['media']['nodes']:
             imgurl = media['thumbnail_src']
             filename = '{}{}{}'.format(media['id'][:5], random.randint(1, 99), imgurl[-10:])
@@ -31,7 +32,10 @@ for user in usernames:
             if response.status_code == 200:
                 with open('image/{}'.format(filename), 'wb') as out_file:
                     shutil.copyfileobj(response.raw, out_file)
+                    imgcounter = imgcounter+1
+                    print("Download picture: {} {}".format(imgcounter, filename))
             else:
                 print("Cannot download image, response status: {}".format(response.status_code))
     else:
         print("Request errore, response status: {}".format(res.status_code))
+    print('----------------------------')
