@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, requests
+import sys, os, glob, requests, random
 import pandas as pd
 import mysql.connector
 from pprint import pprint
@@ -12,30 +12,6 @@ USER_TABLE = "wppt_users"
 USER_META_TABLE = "wppt_usermeta"
 POST_TABLE = "wppt_posts"
 POST_META_TABLE = "wppt_postmeta"
-
-def uploadImage(username, password, imagePaths):
-	# Using: https://it.wordpress.org/plugins/jwt-authentication-for-wp-rest-api/
-	print("Login with: {}".format(username))
-	# Get JWT-Token
-	res = requests.post(url = "{}/wp-json/jwt-auth/v1/token".format(HOST),
-						data = { 'username': username, 'password': password})
-
-	token = res.json()['token']
-	#print("Login complete, token: {}".format(token))
-	imagesids = []
-	for image in imagePaths:
-		data = open(image, 'rb').read()
-		fileName = os.path.basename(image)
-		print("Uploading: {}".format(image))
-		res = requests.post(url = '{}/wp-json/wp/v2/media'.format(HOST),
-							data = data,
-							headers = {
-								'Authorization':"Bearer " + token,
-								'Content-Type': 'image/jpg',
-								'Content-Disposition' : 'attachment; filename=%s'% fileName
-						})
-		imagesids.append(res.json()['id'])
-	return imagesids
 
 def createUser(cnx, value):
 	cursor = cnx.cursor()
@@ -69,7 +45,7 @@ def createPost(cnx, userid, value):
 	cnx.commit()
 	return cursor.lastrowid
 
-def updateMetaPost(cnx, productid, imageids, values):
+def updateMetaPost(cnx, productid, values):
 	cursor = cnx.cursor()
 	query = ("INSERT INTO " + POST_META_TABLE + 
 			 "(post_id, meta_key, meta_value)"
@@ -86,6 +62,8 @@ def updateMetaPost(cnx, productid, imageids, values):
 		'_length': '',
 		'_weight': '',
 		'_width': '',
+		'_wpuf_form_id': '',
+		'php_everywhere_code': '',
 		'_manage_stock': 'no',
 		'_product_attributes': 'a:0:{}',
 		'_product_version': '3.3.1',
@@ -111,9 +89,9 @@ def updateMetaPost(cnx, productid, imageids, values):
 		'et_enqueued_post_fonts': 'a:2:{s:6:\"family\";a:0:{}s:6:\"subset\";a:2:{i:0;s:5:\"latin\";i:1;s:9:\"latin-ext\";}}',
 		'_price': float(values['ct_24h_post_editor_cb97']),
 		'_regular_price': float(values['ct_24h_post_editor_cb97']),
-		'_product_image': imageids[0],
-		'_thumbnail_id': imageids[0],
-		'_product_image_gallery': ','.join([str(x) for x in imageids]),
+		'_product_image': '',
+		'_thumbnail_id': '', 
+		'_product_image_gallery': '',
 		'ct_12h_post_text_39c1': '${}'.format(float(values['ct_12h_post_text_39c1'])),
 		'ct_1h_post_text_d4d1': '${}'.format(float(values['ct_1h_post_text_d4d1'])),
 		'ct_24h_post_editor_cb97': '${}'.format(float(values['ct_24h_post_editor_cb97'])),
@@ -129,8 +107,10 @@ def updateMetaPost(cnx, productid, imageids, values):
 			'meta_key': i,
 			'meta_value': value[i]
 		})
-		cnx.commit()
-
+		
+	with open('idusername.txt', 'a') as logger:
+		logger.write("{},{}\n".format(productid,values['ct_Instagram__text_846a']))
+	cnx.commit()
 	cursor.close()
 	
 def updateMetaUser(cnx, userid, nickname):
@@ -165,8 +145,7 @@ def updateMetaUser(cnx, userid, nickname):
 			'meta_key': i,
 			'meta_value': value[i]
 		})
-		cnx.commit()
-
+	cnx.commit()
 	cursor.close()
 
 def checkTerm(cnx, name, type):
@@ -199,13 +178,6 @@ def createTerm(cnx, name, type):
 	return termid
 
 def createRelationship(cnx, postid, termid, type):
-	cursor = cnx.cursor()
-	query = ("INSERT INTO wppt_term_relationships"
-			 "(object_id, term_taxonomy_id)"
-			 "VALUES (%(object_id)s, %(term_taxonomy_id)s)")
-	cursor.execute(query, {'object_id': postid, 'term_taxonomy_id': termid})
-	print("Create relationship, postid: {}, termid: {}, type: {}".format(postid, termid, type))
-	cnx.commit()
 	query = ("SELECT DISTINCT count, term_taxonomy_id FROM wppt_term_taxonomy WHERE term_id=%s AND taxonomy='%s'" % (termid, type))
 	cursor = cnx.cursor()
 	cursor.execute(query)
@@ -224,11 +196,20 @@ def createRelationship(cnx, postid, termid, type):
 		print("Update term_taxonomy_id: {}, count: {} => {}".format(id, int(count), int(count)+1))
 	else:
 		query = ("INSERT INTO wppt_term_taxonomy"
-			 "(term_id, taxonomy)"
-			 "VALUES (%(term_id)s, %(taxonomy)s)")
+			 "(term_id, taxonomy, count)"
+			 "VALUES (%(term_id)s, %(taxonomy)s, 1)")
 		cursor.execute(query, {'term_id': termid, 'taxonomy': type})
 		cnx.commit()
-		print("Taxonomy not exist, init with count 0. termid: {}, taxonomy: {}".format(termid, type))
+		print("Taxonomy not exist, init with count 1. termid: {}, taxonomy: {}".format(termid, type))
+		id = cursor.lastrowid
+	
+	cursor = cnx.cursor()
+	query = ("INSERT INTO wppt_term_relationships"
+			 "(object_id, term_taxonomy_id)"
+			 "VALUES (%(object_id)s, %(term_taxonomy_id)s)")
+	cursor.execute(query, {'object_id': postid, 'term_taxonomy_id': id})
+	print("Create relationship, postid: {}, taxonomyid: {}, type: {}".format(postid, id, type))
+	cnx.commit()
 	
 xlsfiles = []
 index = 0
@@ -263,7 +244,7 @@ for i in df.index:
 		'ct_1h_post_text_d4d1': '5',
 		'ct_24h_post_editor_cb97': str(df['1 post 24h'][i]).strip(),
 		'ct_3h_post_text_2029': '5',
-		'ct_Instagram__text_846a': '', #str(df['Profile name'][i]).strip()
+		'ct_Instagram__text_846a': str(df['Profile name'][i]).strip(),
 		'ct_Link_in_bi_radio_a6bf': 'Yes',
 		'ct_Permanent__text_f9d4': str(df['1 post (permanent post)'][i]).strip(),
 		'ct_Story_text_fd6d': str(df['1 story'][i]).strip()
@@ -280,45 +261,39 @@ cnx = mysql.connector.connect(user='root', password='root',
                               host='127.0.0.1',
                               database='topshoutout')
 
-index = 0
-
-userid = createUser(cnx, userValue[index])
-print("New user {} id: {}".format(userValue[index]['user_login'], userid))
-updateMetaUser(cnx, userid, userValue[index]['display_name'])
-print("Meta user updated for user id: {}".format(userid))
-print("----------------------------")
-
-imagesids = (uploadImage('TopShoutout', 'TopShoutout123!!', 
-	['/home/alessandro/Immagini/Kidult_235/231533Kidult_162017114839.jpeg', 
-	 '/home/alessandro/Immagini/Kidult_235/231526Kidult_162017114811.jpeg', 
-	 '/home/alessandro/Immagini/Kidult_235/231527Kidult_162017120252.jpeg']))
-
-postid = createPost(cnx, userid, additionalInfo[index])
-print("New post {}_{} id: {}".format(additionalInfo[index]['niche1'], userid, postid))
-updateMetaPost(cnx, postid, imagesids, postValue[index])
-print("Meta post updated for post id: {}".format(postid))
-print("----------------------------")
-
-if not additionalInfo[index]['niche1'] == "" and not additionalInfo[index]['niche1'] == "nan" :
-	createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche1'], 'niche'), 'niche')
-	print("----------------------------")
-if not additionalInfo[index]['niche2'] == "" and not additionalInfo[index]['niche2'] == "nan" :
-	createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche2'], 'niche'), 'niche')
-	print("----------------------------")
-if not additionalInfo[index]['niche3'] == "" and not additionalInfo[index]['niche3'] == "nan" :
-	createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche3'], 'niche'), 'niche')
-	print("----------------------------")
-if not additionalInfo[index]['country'] == "" and not additionalInfo[index]['country'] == "nan" :
-	createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['country'], 'location'), 'location')
-	print("----------------------------")
-if not additionalInfo[index]['gender'] == "" and not additionalInfo[index]['gender'] == "nan" :
-	createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['gender'], 'audience_gender'), 'audience_gender')
+for index in range (0, len(userValue)):
+	print("Index: {}".format(index))
+	userid = createUser(cnx, userValue[index])
+	print("New user {} id: {}".format(userValue[index]['user_login'], userid))
+	updateMetaUser(cnx, userid, userValue[index]['display_name'])
+	print("Meta user updated for user id: {}".format(userid))
 	print("----------------------------")
 
-# Wordpress simple and influenzer cat
-createRelationship(cnx, postid, checkTerm(cnx, 'simple', 'product_type'), 'product_type')
-#createRelationship(cnx, postid, checkTerm(cnx, 'influenzer', 'product_cat'), 'product_cat') # Related products 'problems'
+	postid = createPost(cnx, userid, additionalInfo[index])
+	print("New post {}_{} id: {}".format(additionalInfo[index]['niche1'], userid, postid))
+	updateMetaPost(cnx, postid, postValue[index])
+	print("Meta post updated for post id: {}".format(postid))
+	print("----------------------------")
 
-print("Complete!")
+	if not additionalInfo[index]['niche1'] == "" and not additionalInfo[index]['niche1'] == "nan" :
+		createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche1'], 'niche'), 'niche')
+		print("----------------------------")
+	if not additionalInfo[index]['niche2'] == "" and not additionalInfo[index]['niche2'] == "nan" :
+		createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche2'], 'niche'), 'niche')
+		print("----------------------------")
+	if not additionalInfo[index]['niche3'] == "" and not additionalInfo[index]['niche3'] == "nan" :
+		createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['niche3'], 'niche'), 'niche')
+		print("----------------------------")
+	if not additionalInfo[index]['country'] == "" and not additionalInfo[index]['country'] == "nan" :
+		createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['country'], 'location'), 'location')
+		print("----------------------------")
+	if not additionalInfo[index]['gender'] == "" and not additionalInfo[index]['gender'] == "nan" :
+		createRelationship(cnx, postid, checkTerm(cnx, additionalInfo[index]['gender'], 'audience_gender'), 'audience_gender')
+		print("----------------------------")
+
+	# Wordpress simple and influenzer cat
+	createRelationship(cnx, postid, checkTerm(cnx, 'simple', 'product_type'), 'product_type')
+	createRelationship(cnx, postid, checkTerm(cnx, 'influenzer', 'product_cat'), 'product_cat') 
+
+	print("Complete!\n----------------------------")
 cnx.close()
-
