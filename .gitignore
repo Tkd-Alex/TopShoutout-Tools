@@ -1,0 +1,8 @@
+importer/xls
+importer/xls/*
+importer/*.txt
+crawler/image
+crawler/image/*
+crawler/*.txt
+crawler/*.json
+
