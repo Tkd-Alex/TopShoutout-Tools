@@ -1,5 +1,3 @@
-# TopShoutout-Tools
-
 ## To-Do in topshoutout.com
 - Install [JWT Authentication for WP REST API](https://it.wordpress.org/plugins/jwt-authentication-for-wp-rest-api/)
 - [Hide related product](https://docs.woocommerce.com/document/remove-related-posts-output/): 
@@ -76,3 +74,14 @@ function et_divi_output_content_wrapper_end() {
 		</div> <!-- #main-content -->';
 }
 ```
+- Fix all menu
+  - **Influencer Dashbord Menu**
+    - Dashboard (page)
+    - Add Instagram Page (page)
+    - Edit account (page)
+  - **Primary Menu**
+    - Add dashboard (page) Show if Influencer, Hide if Company
+    - Remove my account for influenzer
+  - Edit page **Dashboard** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_dashboard post_type="product"]]
+  - Edit page **Edit** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_edit]]
+  - Edit page **Edit Account** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_editprofile]]
