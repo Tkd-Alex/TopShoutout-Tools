@@ -85,3 +85,10 @@ function et_divi_output_content_wrapper_end() {
   - Edit page **Dashboard** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_dashboard post_type="product"]]
   - Edit page **Edit** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_edit]]
   - Edit page **Edit Account** [1/4 , 3/4] [Sidebar, Text], [Influencer Dashbord Menu, [wpuf_editprofile]]
+- Disable (and delete):
+  - [Ultimate CSV Importer](https://it.wordpress.org/plugins/wp-ultimate-csv-importer/)
+  - [Wp All Import](http://www.wpallimport.com/)
+  - [Mailgun for WordPress](https://it.wordpress.org/plugins/mailgun/)
+- Install:
+  - [WP Mail SMTP by WPForms](https://it.wordpress.org/plugins/wp-mail-smtp/)
+  - [WP Mail Logging](https://it.wordpress.org/plugins/wp-mail-logging/)
