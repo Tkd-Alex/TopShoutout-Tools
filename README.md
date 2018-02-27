@@ -104,3 +104,4 @@ function et_divi_output_content_wrapper_end() {
 - Install:
   - [WP Mail SMTP by WPForms](https://it.wordpress.org/plugins/wp-mail-smtp/)
   - [WP Mail Logging](https://it.wordpress.org/plugins/wp-mail-logging/)
+- Update custom mail template.
