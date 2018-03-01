@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from joblib import Parallel, delayed
 from ballpark import ballpark
 
-HOST = "http://localhost/topshoutup"
+HOST = "https://topshoutout.com"
 
 def login(username, password):
 	# Using: https://it.wordpress.org/plugins/jwt-authentication-for-wp-rest-api/
@@ -36,9 +36,9 @@ def uploadImage(token, image):
 
 def updateUserWP(user, imageids, nfollower, averangelikes):
     post_id = user.split(',')[0]
-    cnx = mysql.connector.connect(user='root', password='root',
-                              host='127.0.0.1',
-                              database='topshoutout')
+    cnx = mysql.connector.connect(user='topshout_import', password='passwordIMPORTER#2018',
+                              host='topshoutout.com',
+                              database='topshout_wp217')
     cursor = cnx.cursor()
     query = ("UPDATE wppt_postmeta "
                 "SET meta_value = '%s' "

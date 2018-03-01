@@ -7,7 +7,7 @@ from pprint import pprint
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
 
-HOST = "http://localhost/topshoutup"
+HOST = "https://topshoutout.com"
 USER_TABLE = "wppt_users"
 USER_META_TABLE = "wppt_usermeta"
 POST_TABLE = "wppt_posts"
@@ -257,9 +257,9 @@ for i in df.index:
 		'niche3': str(df['Niche 3'][i]).strip()
 	})
 
-cnx = mysql.connector.connect(user='root', password='root',
-                              host='127.0.0.1',
-                              database='topshoutout')
+cnx = mysql.connector.connect(user='topshout_import', password='passwordIMPORTER#2018',
+                              host='topshoutout.com',
+                              database='topshout_wp217')
 
 for index in range (0, len(userValue)):
 	print("Index: {}".format(index))
