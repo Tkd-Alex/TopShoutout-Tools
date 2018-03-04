@@ -9147,3 +9147,16 @@ function product_count_shortcode( ) {
 	return $count_posts->publish;
 }
 add_shortcode( 'product_count', 'product_count_shortcode' );
+/** [total_fw] shortcode */
+function count_total_fw(){
+	$products = get_posts( array(
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1
+        ));
+	$total_fw = 0;
+	foreach ($products as $product)
+		$total_fw += intval(get_post_meta($product->ID, '_price', true));
+	return $total_fw;
+}
+add_shortcode( 'total_fw', 'count_total_fw' );
