@@ -92,14 +92,13 @@ def updateMetaPost(cnx, productid, values):
 		'_product_image': '',
 		'_thumbnail_id': '', 
 		'_product_image_gallery': '',
-		'ct_12h_post_text_39c1': '${}'.format(float(values['ct_12h_post_text_39c1'])),
-		'ct_1h_post_text_d4d1': '${}'.format(float(values['ct_1h_post_text_d4d1'])),
-		'ct_24h_post_editor_cb97': '${}'.format(float(values['ct_24h_post_editor_cb97'])),
-		'ct_3h_post_text_2029': '${}'.format(float(values['ct_3h_post_text_2029'])),
+		'ct_12h_post_text_39c1': float(values['ct_12h_post_text_39c1']),
+		'ct_1h_post_text_d4d1': float(values['ct_1h_post_text_d4d1']),
+		'ct_24h_post_editor_cb97': float(values['ct_24h_post_editor_cb97']),
+		'ct_3h_post_text_2029': float(values['ct_3h_post_text_2029']),
 		'ct_Instagram__text_846a': values['ct_Instagram__text_846a'],
-		'ct_Link_in_bi_radio_a6bf': values['ct_Link_in_bi_radio_a6bf'],
-		'ct_Permanent__text_f9d4': '${}'.format(float(values['ct_Permanent__text_f9d4'])),
-		'ct_Story_text_fd6d': '${}'.format(float(values['ct_Story_text_fd6d']))
+		'ct_Permanent__text_f9d4': float(values['ct_Permanent__text_f9d4']),
+		'ct_Story_text_fd6d': float(values['ct_Story_text_fd6d'])
 	}
 	for i in value:
 		cursor.execute(query, {
@@ -245,7 +244,6 @@ for i in df.index:
 		'ct_24h_post_editor_cb97': str(df['1 post 24h'][i]).strip(),
 		'ct_3h_post_text_2029': '5',
 		'ct_Instagram__text_846a': str(df['Profile name'][i]).strip(),
-		'ct_Link_in_bi_radio_a6bf': 'Yes',
 		'ct_Permanent__text_f9d4': str(df['1 post (permanent post)'][i]).strip(),
 		'ct_Story_text_fd6d': str(df['1 story'][i]).strip()
 	})
