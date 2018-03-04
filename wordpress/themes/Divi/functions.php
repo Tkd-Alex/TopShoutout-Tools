@@ -9142,11 +9142,26 @@ function jk_remove_wc_breadcrumbs() {
     remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 );
 }
 /** [product_count] shortcode */
-function product_count_shortcode( ) {
+function product_count_shortcode() {
 	$count_posts = wp_count_posts( 'product' );
 	return $count_posts->publish;
 }
 add_shortcode( 'product_count', 'product_count_shortcode' );
+/** [nice_number number=?] shortcode */
+function nice_number($atts) {
+	if(isset($atts['number']) && is_numeric($atts['number'])) $number = $atts['number'];
+	else $number = 0;
+    
+    $number = (0 + str_replace(",", "", $number));
+
+    if ($number > 1000000000000) return number_format(($number/1000000000000), 2, '.', ',').'T';
+    elseif ($number > 1000000000) return number_format(($number/1000000000), 2, '.', ',').'B';
+    elseif ($number > 1000000) return number_format(($number/1000000), 2, '.', ',').'M';
+    elseif ($number > 1000) return number_format(($number/1000), 2, '.', ',').'K';
+
+    return number_format($number, 2, '.', ',');
+}
+add_shortcode( 'nice_number', 'count_total_fw' );
 /** [total_fw] shortcode */
 function count_total_fw(){
 	$products = get_posts( array(
@@ -9157,6 +9172,7 @@ function count_total_fw(){
 	$total_fw = 0;
 	foreach ($products as $product)
 		$total_fw += intval(get_post_meta($product->ID, '_price', true));
-	return $total_fw;
+	return nice_number(array('number' => $total_fw));
 }
 add_shortcode( 'total_fw', 'count_total_fw' );
+
