@@ -529,6 +529,10 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 $percentage = ($max_price / 100) * 10;
                 if($percentage < 4.99) $price = '4.99';
                 else $price = strval(round($percentage, 2));
+
+                delete_post_meta( $post_id, '_price' );
+                delete_post_meta( $post_id, '_regular_price' );
+                
                 add_post_meta( $post_id, '_price', $price );
                 add_post_meta( $post_id, '_regular_price', $price );
             }
