@@ -15,7 +15,7 @@ add_filter('woof_print_content_before_search_form', function($content) {
 });
 ```
 - Install [YITH Infinite Scrolling](https://wordpress.org/plugins/yith-infinite-scrolling/) and [set-up](https://www.woocommerce-filter.com/make-infinite-scroll-for-filtered-products-also/) for replace woocommerce pagination.
-- [Auto complete orders](https://docs.woocommerce.com/document/automatically-complete-orders/). Or replace the file [divi_functions.php](/wp_res/divi_functions.php). Remember to disable mail for _Processing Orders_
+- [Auto complete orders](https://docs.woocommerce.com/document/automatically-complete-orders/). Or replace the file [divi_functions.php](/wp_res/themes/Divi/functions.php). Remember to disable mail for _Processing Orders_
 ```php
 add_action( 'woocommerce_thankyou', 'custom_woocommerce_auto_complete_order' );
 function custom_woocommerce_auto_complete_order( $order_id ) { 
@@ -27,7 +27,7 @@ function custom_woocommerce_auto_complete_order( $order_id ) {
     $order->update_status( 'completed' );
 }
 ```
-- Put the sidebar on top (for mobile responsive). Replace the following function in file __wp-content/themes/Divi/functions.php_ or replace the file with [divi_functions.php](/wp_res/divi_functions.php)
+- Put the sidebar on top (for mobile responsive). Replace the following function in file __wp-content/themes/Divi/functions.php_ or replace the file with [divi_functions.php](/wp_res/themes/Divi/functions.php)
 ```php
 function et_divi_output_content_wrapper() {
 	echo '
