@@ -9141,4 +9141,9 @@ add_action( 'init', 'jk_remove_wc_breadcrumbs' );
 function jk_remove_wc_breadcrumbs() {
     remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 );
 }
-
+/** [product_count] shortcode */
+function product_count_shortcode( ) {
+	$count_posts = wp_count_posts( 'product' );
+	return $count_posts->publish;
+}
+add_shortcode( 'product_count', 'product_count_shortcode' );
