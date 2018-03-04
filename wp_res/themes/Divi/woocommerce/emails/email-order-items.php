@@ -44,7 +44,7 @@ foreach ( $items as $item_id => $item ) :
 
 				$BSA = $product->post->post_author;
 				$user_eem = get_the_author_meta('user_email', $BSA);
-				$user_llg = get_the_author_meta('user_login', $BSA);
+				//$user_llg = get_the_author_meta('user_login', $BSA);
 
 				echo "<b>Email</b>: ".$user_eem."<br>";
 
