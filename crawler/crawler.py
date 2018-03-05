@@ -8,8 +8,22 @@ from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
 from joblib import Parallel, delayed
 from ballpark import ballpark
+import sqlite3
+
+from flask import Flask, request
+app = Flask(__name__)
 
 HOST = "https://topshoutout.com"
+conn = None
+
+@app.route('/new', methods=['POST'])
+def newProduct():
+    pprint(request.form)
+    query = ("INSERT INTO influencers (POST_ID, IG_NAME, THUMB_ID, GALLERY_IDS) "
+            "VALUES (%d, '%s', '%s', '%s' )" % ( int(request.form['post_id']), request.form['ig_name'], request.form['thumbnail_id'], request.form['product_image_gallery']) )
+    conn.execute(query)
+    conn.commit()
+    return "Hello World!"
 
 def login(username, password):
 	# Using: https://it.wordpress.org/plugins/jwt-authentication-for-wp-rest-api/
@@ -40,24 +54,24 @@ def updateUserWP(user, imageids, nfollower, averangelikes):
                               host='topshoutout.com',
                               database='topshout_wp217')
     cursor = cnx.cursor()
-    query = ("UPDATE wppt_postmeta "
-                "SET meta_value = '%s' "
-                "WHERE meta_key = '_product_image' AND post_id = '%s' " % (imageids[0], post_id) ) 
-    cursor.execute(query)
+
     query = ("UPDATE wppt_postmeta "
             "SET meta_value = '%s' "
             "WHERE meta_key = '_thumbnail_id' AND post_id = '%s' " % (imageids[0], post_id) ) 
     cursor.execute(query)
+
     query = ("UPDATE wppt_postmeta "
             "SET meta_value = '%s' "
             "WHERE meta_key = '_product_image_gallery' AND post_id = '%s' " % (','.join([str(x) for x in imageids[-4:]]), post_id) ) 
     cursor.execute(query)
+
     post_excerpt = '<div>{} Followers</div><div>{}% Engagement Rate</div>'.format(ballpark(nfollower),  str(round(float( averangelikes / int(nfollower) ) * 100, 2)) )
     today = datetime.now().date()
     query = ("UPDATE wppt_posts "
             "SET post_excerpt = '%s', post_modified = '%s', post_modified_gmt = '%s' "
             "WHERE ID = '%s' " % (post_excerpt, today, today, post_id) ) 
     cursor.execute(query)
+
     cnx.commit()
 
 def downloadImage(imgurl, filename):
@@ -114,10 +128,23 @@ def fetchUserInfo(user, token):
     else:
         print("Request error, response status: {}".format(res.status_code))
 
-token = login('TopShoutout', 'TopShoutout123!!')
-with open("../importer/idusername.txt") as f:
-    usernames = f.readlines()
-for user in usernames:
-    fetchUserInfo(user, token)
-    print("-------------------")
+if __name__ == '__main__':
+    conn = sqlite3.connect('influencer.db')
+    conn.execute('''CREATE TABLE IF NOT EXISTS influencers
+         (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            POST_ID INTEGER NOT NULL,
+            IG_NAME CHAR(255) NOT NULL,
+            THUMB_ID CHAR(50),
+            GALLERY_IDS CHAR(50)
+        );''')
 
+    app.run(host='0.0.0.0', port=6565)
+    '''
+    token = login('TopShoutout', 'TopShoutout123!!')
+    with open("../importer/idusername.txt") as f:
+        usernames = f.readlines()
+    for user in usernames:
+        fetchUserInfo(user, token)
+        print("-------------------")
+    '''

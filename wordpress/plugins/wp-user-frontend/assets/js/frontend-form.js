@@ -367,7 +367,7 @@
                 // send the request
                 form.find('li.wpuf-submit').append('<span class="wpuf-loading"></span>');
                 submitButton.attr('disabled', 'disabled').addClass('button-primary-disabled');
-                /*
+                
                 $.post(wpuf_frontend.ajaxurl, form_data, function(res) {
                     // var res = $.parseJSON(res);
 
@@ -418,7 +418,7 @@
                     submitButton.removeClass('button-primary-disabled');
                     form.find('span.wpuf-loading').remove();
                 });
-                */
+                
             }
         },
 
