@@ -13,16 +13,18 @@ import sqlite3
 from flask import Flask, request
 app = Flask(__name__)
 
-HOST = "https://topshoutout.com"
+#HOST = "https://topshoutout.com"
+HOST = "http://localhost/topshoutup"
 conn = None
+token = None
 
 @app.route('/new', methods=['POST'])
 def newProduct():
-    pprint(request.form)
     query = ("INSERT INTO influencers (POST_ID, IG_NAME, THUMB_ID, GALLERY_IDS) "
             "VALUES (%d, '%s', '%s', '%s' )" % ( int(request.form['post_id']), request.form['ig_name'], request.form['thumbnail_id'], request.form['product_image_gallery']) )
     conn.execute(query)
     conn.commit()
+    fetchUserInfo('{},{}'.format(int(request.form['post_id']), request.form['ig_name']))
     return "Hello World!"
 
 def login(username, password):
@@ -35,7 +37,7 @@ def login(username, password):
 	token = res.json()['token']
 	return token
 
-def uploadImage(token, image):
+def uploadImage(image):
     data = open('image/{}'.format(image), 'rb').read()
     fileName = os.path.basename('image/{}'.format(image))
     print("Uploading: {}".format(image))
@@ -50,9 +52,8 @@ def uploadImage(token, image):
 
 def updateUserWP(user, imageids, nfollower, averangelikes):
     post_id = user.split(',')[0]
-    cnx = mysql.connector.connect(user='topshout_import', password='passwordIMPORTER#2018',
-                              host='topshoutout.com',
-                              database='topshout_wp217')
+    #cnx = mysql.connector.connect(user='topshout_import', password='passwordIMPORTER#2018', host='topshoutout.com', database='topshout_wp217')
+    cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='topshoutout')
     cursor = cnx.cursor()
 
     query = ("UPDATE wppt_postmeta "
@@ -91,7 +92,7 @@ def downloadImage(imgurl, filename):
             errfile.write("{}\n".format(imgurl))
             print(error)
 
-def fetchUserInfo(user, token):
+def fetchUserInfo(user):
     username = user.split(',')[1].strip().replace('@','')
     url = "https://www.instagram.com/{}/?__a=1".format(username)
     res = requests.get(url, stream=True)
@@ -114,7 +115,7 @@ def fetchUserInfo(user, token):
                     url = media['thumbnail_src']
                     filename = '{}{}{}'.format(media['id'][:5], random.randint(1, 99), url[-10:])
                     imgurls.append(downloadImage(url, filename))
-                imgids = Parallel(n_jobs=3, backend="threading")(delayed(uploadImage)(token, imgurl) for imgurl in imgurls)
+                imgids = Parallel(n_jobs=3, backend="threading")(delayed(uploadImage)(imgurl) for imgurl in imgurls)
                 updateUserWP(user, imgids, nfollower, averangelikes)
             else:
                 print("Private page")
@@ -139,12 +140,13 @@ if __name__ == '__main__':
             GALLERY_IDS CHAR(50)
         );''')
 
-    app.run(host='0.0.0.0', port=6565)
-    '''
     token = login('TopShoutout', 'TopShoutout123!!')
+    app.run(host='0.0.0.0', port=6565)
+    
+    '''
     with open("../importer/idusername.txt") as f:
         usernames = f.readlines()
     for user in usernames:
-        fetchUserInfo(user, token)
+        fetchUserInfo(user)
         print("-------------------")
     '''

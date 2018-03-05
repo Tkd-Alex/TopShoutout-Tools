@@ -785,13 +785,20 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             }
 
             // Here contact python api with IG name and $post_id
+
             if( !$is_update ){
+                $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+                $product_image_gallery = get_post_meta($post_id, '_product_image_gallery', true);
+
+                if($thumbnail_id == "") add_post_meta( $post_id, '_thumbnail_id', '' );
+                if($product_image_gallery == "") add_post_meta( $post_id, '_product_image_gallery', '' );
+
                 $url = 'http://127.0.0.1:6565/new';
                 $data = array(
                     'post_id' => $post_id, 
                     'ig_name' => $_POST['ct_Instagram__text_846a'],
-                    'thumbnail_id' => get_post_meta($post_id, '_thumbnail_id', true), 
-                    'product_image_gallery' => get_post_meta($post_id, '_product_image_gallery', true)
+                    'thumbnail_id' => $thumbnail_id, 
+                    'product_image_gallery' => $product_image_gallery
                 );
 
                 $options = array(
@@ -803,6 +810,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 );
                 $context  = stream_context_create($options);
                 $result = file_get_contents($url, false, $context);
+                
             }
 
             wpuf_clear_buffer();
