@@ -143,7 +143,7 @@ if __name__ == '__main__':
         );''')
 
     token = login('TopShoutout', 'TopShoutout123!!')
-    app.run(host='0.0.0.0', port=6565)
+    app.run(host='0.0.0.0', port=6565, threaded=True)
     
     '''
     with open("../importer/idusername.txt") as f:
