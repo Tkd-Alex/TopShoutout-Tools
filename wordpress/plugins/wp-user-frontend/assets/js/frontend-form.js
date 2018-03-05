@@ -367,7 +367,7 @@
                 // send the request
                 form.find('li.wpuf-submit').append('<span class="wpuf-loading"></span>');
                 submitButton.attr('disabled', 'disabled').addClass('button-primary-disabled');
-
+                /*
                 $.post(wpuf_frontend.ajaxurl, form_data, function(res) {
                     // var res = $.parseJSON(res);
 
@@ -418,6 +418,7 @@
                     submitButton.removeClass('button-primary-disabled');
                     form.find('span.wpuf-loading').remove();
                 });
+                */
             }
         },
 
@@ -436,10 +437,36 @@
             // ===== Validate: Text and Textarea ========
             var required = self.find('[data-required="yes"]:visible');
 
+            var at_least_one   = false;
+            var numeric_name   = [
+                'ct_Permanent__text_f9d4',
+                'ct_24h_post_editor_cb97',
+                'ct_12h_post_text_39c1',
+                'ct_3h_post_text_2029',
+                'ct_1h_post_text_d4d1',
+                'ct_Story_text_fd6d',
+                'ct_1post__1_s_text_2893',
+                'ct_1post__1_s_text_fc6e'
+            ];
+            for(var n in numeric_name){ 
+                var item = ($('input[name=' + numeric_name[n] + ']'));
+                var val  = $.trim($(item).val());
+                if(val !== ''){ 
+                    at_least_one = true;
+                    if(isNaN(val)){
+                        error = true;
+                        error_type = 'number';
+                        WP_User_Frontend.markError(item, error_type );
+                    } 
+                }
+            }
+            if(!at_least_one){
+                error = true;
+                error_type = 'at_least_one';
+                WP_User_Frontend.markError(($('input[name=' + numeric_name[0] + ']')), error_type );
+            }
+            
             required.each(function(i, item) {
-                // temp_val = $.trim($(item).val());
-
-                // console.log( $(item).data('type') );
                 var data_type = $(item).data('type')
                     val = '';
 
@@ -460,8 +487,9 @@
                     case 'text':
 
                         val = $.trim( $(item).val() );
+                        var name = $(item).attr('name');
 
-                        if ( val === '') {
+                        if ( val === '' || (name == 'ct_Instagram__text_846a' && val === '@')) {
                             error = true;
                             error_type = 'required';
 
@@ -656,6 +684,12 @@
                         break;
                     case 'validation' :
                         error_string = error_string + ' ' + error_str_obj[error_type];
+                        break
+                    case 'number' :
+                        error_string = error_string + ' must be a number';
+                        break
+                    case 'at_least_one' :
+                        error_string = 'Enter at least one shoutout';
                         break
                 }
                 $(item).siblings('.wpuf-error-msg').remove();
