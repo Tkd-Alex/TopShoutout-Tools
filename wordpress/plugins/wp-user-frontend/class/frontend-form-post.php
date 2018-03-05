@@ -785,11 +785,25 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             }
 
             // Here contact python api with IG name and $post_id
-            /*
             if( !$is_update ){
+                $url = 'http://127.0.0.1:6565/new';
+                $data = array(
+                    'post_id' => $post_id, 
+                    'ig_name' => $_POST['ct_Instagram__text_846a'],
+                    'thumbnail_id' => get_post_meta($post_id, '_thumbnail_id', true), 
+                    'product_image_gallery' => get_post_meta($post_id, '_product_image_gallery', true)
+                );
 
+                $options = array(
+                  'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data),
+                  ),
+                );
+                $context  = stream_context_create($options);
+                $result = file_get_contents($url, false, $context);
             }
-            */
 
             wpuf_clear_buffer();
             wp_send_json( $response );
@@ -990,6 +1004,9 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             }
         }
 
+        // Gallery ids list
+        $image_gallery = array();
+
         // save any files attached
         foreach ( $files as $file_input ) {
             // delete any previous value
@@ -1007,7 +1024,9 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 }
 
                 wpuf_associate_attachment( $attachment_id, $post_id );
-                add_post_meta( $post_id, $file_input['name'], $attachment_id );
+                // If the name is _product_image_gallery add id to array, else add post meta
+                if($file_input['name'] == "_product_image_gallery") array_push($image_gallery, $attachment_id);
+                else add_post_meta( $post_id, $file_input['name'], $attachment_id );
 
                 // file title, caption, desc update
                 $file_data = isset( $_POST['wpuf_files_data'][$attachment_id] ) ? $_POST['wpuf_files_data'][$attachment_id] : false;
@@ -1025,6 +1044,10 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 $file_numbers++;
             }
         }
+        
+        // Add meta _product_image_gallery with list of ids image.
+        if(sizeof($image_gallery) >=1 ) add_post_meta( $post_id, '_product_image_gallery', join(",", $image_gallery) );
+        
     }
 
     function prepare_mail_body( $content, $user_id, $post_id ) {
