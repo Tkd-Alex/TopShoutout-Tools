@@ -1,14 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, requests, shutil, random
+import sys, os, glob, requests, shutil, random, sqlite3, _thread, pymysql
 import pandas as pd
-import mysql.connector
 from pprint import pprint
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
 from joblib import Parallel, delayed
 from ballpark import ballpark
-import sqlite3
 
 from flask import Flask, request
 app = Flask(__name__)
@@ -24,8 +22,12 @@ def newProduct():
             "VALUES (%d, '%s', '%s', '%s' )" % ( int(request.form['post_id']), request.form['ig_name'], request.form['thumbnail_id'], request.form['product_image_gallery']) )
     conn.execute(query)
     conn.commit()
-    fetchUserInfo('{},{}'.format(int(request.form['post_id']), request.form['ig_name']))
-    return "Hello World!"
+    try:
+        _thread.start_new_thread( fetchUserInfo, ('{},{}'.format(int(request.form['post_id']), request.form['ig_name']), ) )
+    except Exception as error:
+        print ("Error: unable to start thread")
+        print(error)
+    return "True"
 
 def login(username, password):
 	# Using: https://it.wordpress.org/plugins/jwt-authentication-for-wp-rest-api/
@@ -52,8 +54,8 @@ def uploadImage(image):
 
 def updateUserWP(user, imageids, nfollower, averangelikes):
     post_id = user.split(',')[0]
-    #cnx = mysql.connector.connect(user='topshout_import', password='passwordIMPORTER#2018', host='topshoutout.com', database='topshout_wp217')
-    cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='topshoutout')
+    #cnx = pymysql.connect(user='topshout_import', password='passwordIMPORTER#2018', host='topshoutout.com', database='topshout_wp217')
+    cnx = pymysql.connect(user='root', password='root', host='localhost', database='topshoutout')
     cursor = cnx.cursor()
 
     query = ("UPDATE wppt_postmeta "
@@ -69,7 +71,7 @@ def updateUserWP(user, imageids, nfollower, averangelikes):
     post_excerpt = '<div>{} Followers</div><div>{}% Engagement Rate</div>'.format(ballpark(nfollower),  str(round(float( averangelikes / int(nfollower) ) * 100, 2)) )
     today = datetime.now().date()
     query = ("UPDATE wppt_posts "
-            "SET post_excerpt = '%s', post_modified = '%s', post_modified_gmt = '%s' "
+            "SET post_excerpt = '%s', post_modified = '%s', post_modified_gmt = '%s', post_status='publish' "
             "WHERE ID = '%s' " % (post_excerpt, today, today, post_id) ) 
     cursor.execute(query)
 
@@ -134,7 +136,7 @@ if __name__ == '__main__':
     conn.execute('''CREATE TABLE IF NOT EXISTS influencers
          (
             ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            POST_ID INTEGER NOT NULL,
+            POST_ID INTEGER UNIQUE NOT NULL,
             IG_NAME CHAR(255) NOT NULL,
             THUMB_ID CHAR(50),
             GALLERY_IDS CHAR(50)
