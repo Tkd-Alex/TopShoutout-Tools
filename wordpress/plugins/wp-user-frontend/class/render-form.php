@@ -1559,6 +1559,13 @@ class WPUF_Render_Form {
         if ( $post_id ) {
             if ( $this->is_meta( $attr ) ) {
                 $images = $this->get_meta( $post_id, $attr['name'], $type, false );
+                // Solve problem with _product_image_gallery
+                $tmp_images = array();
+                foreach ($images as $img) 
+                    if (strpos($img, ',') !== false && $attr['name'] == "_product_image_gallery")
+                        $tmp_images = array_merge($tmp_images, explode(',', $img));
+                
+                if(sizeof($tmp_images) >= 1) $images = $tmp_images;
                 $has_images = true;
             } else {
 
