@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, json, configparser
+import sys, os, glob, json, configparser, query, sqlite3
 import pandas as pd
 from pprint import pprint
 from flask import Flask, request, Response
@@ -31,6 +31,9 @@ if __name__ == '__main__':
 
     config = configparser.ConfigParser()
     config.read('config.ini')
+
+    conn = sqlite3.connect("influencer.db")
+    conn.execute(query.INIT_TABLE)
 
     wpapi = Wordpress(
         wp_usr=config.get('wordpress','username'), wp_psw=config.get('wordpress','password'), wp_host=config.get('wordpress','host'),
