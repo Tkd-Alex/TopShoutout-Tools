@@ -25,5 +25,6 @@ class Endpoint:
                     ( { 'username': request.form['ig_name'], 'post_id': request.form['post_id'] }, self.wpapi, ) 
                 )
             except Exception as e:
+                pprint(e)
                 functions.writeError(e)
         return status, message

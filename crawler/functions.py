@@ -20,6 +20,7 @@ def downloadImage(imgurl, filename):
         else:
             writeError("Cannot download image, response status: {}\nUrl image: {}".format(response.status_code, imgurl))
     except Exception as e:
+        pprint(e)
         writeError(e)
 
 def isInstagramValid(username):
@@ -38,6 +39,7 @@ def isInstagramValid(username):
     else:
         return False, "Unable to check {} page.".format(username)
 
+    print("La pagina è valida vado avanti")
     return True, "Your page has been inserted and is under review."
 
 def fetchInstagramInfo(user, wpapi):
@@ -70,7 +72,8 @@ def fetchInstagramInfo(user, wpapi):
             else:
                 with open('privatepage.txt', 'a') as privatefile:
                     privatefile.write("{}\n".format(url))
-        except Exception as error:
-            writeError(error)
+        except Exception as e:
+            pprint(e)
+            writeError(e)
     else:
         writeError("Request error, response status: {}\nUrl: {}".format(res.status_code, url))

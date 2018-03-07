@@ -15,7 +15,7 @@ endpoint = None
 @app.route('/new', methods=['POST'])
 def newInfluencer():
     status, message = endpoint.newInfluencer(request)
-    js = json.dumps({ 'result': status, 'message': message})
+    js = json.dumps({ 'result': status, 'message': message })
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/',  methods=['GET', 'POST'])
