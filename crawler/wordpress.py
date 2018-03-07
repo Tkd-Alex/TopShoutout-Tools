@@ -68,7 +68,9 @@ class Wordpress:
         post_title = cursor.fetchone()
         if post_title != None:
             post_name = slugify(str(post_title))
-        
+        else: 
+            post_name = ""
+
         guid = '{}/product/{}'.format(self.wpconfig['host'], post_name)
 
         cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))

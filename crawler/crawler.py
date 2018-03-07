@@ -18,6 +18,18 @@ def newInfluencer():
     js = json.dumps({ 'result': status, 'message': message })
     return Response(js, status=200, mimetype='application/json')
 
+@app.route('/update', methods=['POST'])
+def updateInfluencer():
+    status, message = endpoint.updateInfluencer(request)
+    js = json.dumps({ 'result': status, 'message': message })
+    return Response(js, status=200, mimetype='application/json')
+
+@app.route('/delete', methods=['POST'])
+def deleteInfluencer():
+    status, message = endpoint.deleteInfluencer(request)
+    js = json.dumps({ 'result': status, 'message': message })
+    return Response(js, status=200, mimetype='application/json')
+
 @app.route('/',  methods=['GET', 'POST'])
 def hello():
     message = "TopShoutout-Api Working on: {}".format(datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
