@@ -793,7 +793,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 if($thumbnail_id == "") add_post_meta( $post_id, '_thumbnail_id', '' );
                 if($product_image_gallery == "") add_post_meta( $post_id, '_product_image_gallery', '' );
 
-                $url = 'http://127.0.0.1:6565/new';
+                $url = 'http://'.PYTHON_API_ADDRESS.':'.PYTHON_API_PORT.'/new';
                 $data = array(
                     'post_id' => $post_id, 
                     'ig_name' => $_POST['ct_Instagram__text_846a'],
