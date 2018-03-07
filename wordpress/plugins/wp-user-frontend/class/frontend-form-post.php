@@ -679,9 +679,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             }
 
             // if a woocommerce attribute
-            if ( $woo_attr ) {
-                update_post_meta( $post_id, '_product_attributes', $woo_attr );
-            }
+            if ( $woo_attr ) update_post_meta( $post_id, '_product_attributes', $woo_attr );
 
             //redirect URL
             $show_message = false;
@@ -785,33 +783,32 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             }
 
             // Here contact python api with IG name and $post_id
+            $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+            $product_image_gallery = get_post_meta($post_id, '_product_image_gallery', true);
 
-            if( !$is_update ){
-                $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
-                $product_image_gallery = get_post_meta($post_id, '_product_image_gallery', true);
+            if($thumbnail_id == "") add_post_meta( $post_id, '_thumbnail_id', '' );
+            
+            $url = 'http://'.PYTHON_API_ADDRESS.':'.PYTHON_API_PORT. ($is_update ? '/update' : '/new');
+            $data = array(
+                'post_id' => $post_id, 
+                'ig_name' => $_POST['ct_Instagram__text_846a'],
+                'thumbnail_id' => $thumbnail_id, 
+                'product_image_gallery' => $product_image_gallery
+            );
 
-                if($thumbnail_id == "") add_post_meta( $post_id, '_thumbnail_id', '' );
-                if($product_image_gallery == "") add_post_meta( $post_id, '_product_image_gallery', '' );
+            $options = array(
+              'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+              ),
+            );
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $result = json_decode($result, true);
 
-                $url = 'http://'.PYTHON_API_ADDRESS.':'.PYTHON_API_PORT.'/new';
-                $data = array(
-                    'post_id' => $post_id, 
-                    'ig_name' => $_POST['ct_Instagram__text_846a'],
-                    'thumbnail_id' => $thumbnail_id, 
-                    'product_image_gallery' => $product_image_gallery
-                );
-
-                $options = array(
-                  'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data),
-                  ),
-                );
-                $context  = stream_context_create($options);
-                $result = file_get_contents($url, false, $context);
-                
-            }
+            $response['message'] = $result['message'];
+            $response['pythonapi'] = ($result['result'] == "True" ? true : false);
 
             wpuf_clear_buffer();
             wp_send_json( $response );
@@ -997,19 +994,17 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
         }
 
         // save all custom fields
-        foreach ( $meta_key_value as $meta_key => $meta_value ) {
+        foreach ( $meta_key_value as $meta_key => $meta_value )
             update_post_meta( $post_id, $meta_key, $meta_value );
-        }
 
         // save any multicolumn repeatable fields
         foreach ( $multi_repeated as $repeat_key => $repeat_value ) {
             // first, delete any previous repeatable fields
             delete_post_meta( $post_id, $repeat_key );
-
+            
             // now add them
-            foreach ( $repeat_value as $repeat_field ) {
-                add_post_meta( $post_id, $repeat_key, $repeat_field );
-            }
+            foreach ( $repeat_value as $repeat_field )
+                add_post_meta( $post_id, $repeat_key, $repeat_field );                
         }
 
         // Gallery ids list
@@ -1019,7 +1014,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
         foreach ( $files as $file_input ) {
             // delete any previous value
             delete_post_meta( $post_id, $file_input['name'] );
-
+            
             //to track how many files are being uploaded
             $file_numbers = 0;
 
@@ -1034,7 +1029,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 wpuf_associate_attachment( $attachment_id, $post_id );
                 // If the name is _product_image_gallery add id to array, else add post meta
                 if($file_input['name'] == "_product_image_gallery") array_push($image_gallery, $attachment_id);
-                else add_post_meta( $post_id, $file_input['name'], $attachment_id );
+                else add_post_meta( $post_id, $file_input['name'], $attachment_id ); 
 
                 // file title, caption, desc update
                 $file_data = isset( $_POST['wpuf_files_data'][$attachment_id] ) ? $_POST['wpuf_files_data'][$attachment_id] : false;
@@ -1054,7 +1049,8 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
         }
         
         // Add meta _product_image_gallery with list of ids image.
-        if(sizeof($image_gallery) >=1 ) add_post_meta( $post_id, '_product_image_gallery', join(",", $image_gallery) );
+        if(sizeof($image_gallery) >=1 ) 
+            update_post_meta( $post_id, '_product_image_gallery', join(",", $image_gallery) );
         
     }
 
