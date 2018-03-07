@@ -33,9 +33,14 @@ if ( ! $post->post_excerpt ) {
     <?php echo apply_filters( 'woocommerce_short_description', $post->post_excerpt ); ?>
 </div>
 
+<?php
+	echo '<div style="padding-top: 3%;">'.do_shortcode( '[nice_number number="' .get_post_meta($post->ID, 'ct_Followers_text_2365', true). '"]' ).' Followers</div>';
+	echo '<div style="padding-bottom: 5%;">'.do_shortcode( '[ct id="ct_Engagement_text_2863" property="value"]' ).'% Engagement rate</div>';
+?>
+
 <?php echo do_shortcode('[custom_fields_block]'); ?>
 
-<?php echo do_shortcode('[tax id="niche" before="Niche: " separator=", " after=""]'); ?> <br>
-<?php echo do_shortcode('[tax id="account_size" before="Account Size: " separator=", " after=""]'); ?> <br>
-<?php echo do_shortcode('[tax id="location" before="Location: " separator=", " after=""]'); ?> <br>
-<?php echo do_shortcode('[tax id="audience_gender" before="Audience Gender: " separator=", " after=""]'); ?> 
+<?php echo do_shortcode('[tax id="niche" 			before="Niche: " 			separator=", " after=""]'); ?>
+<?php echo do_shortcode('[tax id="account_size" 	before="Account Size: " 	separator=", " after=""]'); ?><br>
+<?php echo do_shortcode('[tax id="location" 		before="Location: " 		separator=", " after=""]'); ?><br>
+<?php echo do_shortcode('[tax id="audience_gender" 	before="Audience Gender: " 	separator=", " after=""]'); ?> 

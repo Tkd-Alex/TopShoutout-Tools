@@ -511,13 +511,13 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
             
             // Calculate total price from custom meta_vars
             $price_fields = array(  "ct_Permanent__text_f9d4",
-                                    "ct_24h_post_editor_cb97",
+                                    "ct_24h_post_text_8482",
                                     "ct_12h_post_text_39c1",
                                     "ct_3h_post_text_2029",
                                     "ct_1h_post_text_d4d1",
                                     "ct_Story_text_fd6d",
-                                    "ct_1post__1_s_text_2893",
-                                    "ct_1post__1_s_text_fc6e" );
+                                    "ct_1post__1_s_text_8af8",
+                                    "ct_1post__1_s_text_1dbc" );
 
             $max_price = 0;
             foreach ($meta_vars as $meta_var)

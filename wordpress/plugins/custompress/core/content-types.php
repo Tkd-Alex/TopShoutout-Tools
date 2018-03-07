@@ -874,8 +874,17 @@ if ( ! class_exists( 'CustomPress_Content_Types' ) ):
 			
 			$result = $fmt['open'];
 
-			$pricingdtls = '<br><p class="pricing-details" style="margin-left: -20px;padding: 0 0 2%;" >Pricing details:</p>';
-			$customfileds = array("Instagram__text_846a", "Fullname_text_ae82" ,"Facebook_text_93e4" ,"Snapchat_text_c392" ,"YouTube_text_e577" ,"Twitter_text_dcb0" ,"Kik_text_e757" ,"Phone_text_4460");
+			$pricingdtls = '<p class="pricing-details" style="margin-left: -20px;padding: 5% 0 2%;" >Pricing details:</p>';
+			$customfileds = array(
+				"Instagram__text_846a",
+				"Fullname_text_ae82",
+				"Facebook_text_93e4",
+				"Snapchat_text_c392",
+				"YouTube_text_e577",
+				"Twitter_text_dcb0",
+				"Kik_text_e757",
+				"Phone_text_4460"
+			);
 			
 			$current_user = get_current_user_id();
 			$BSA = $post->post_author;
@@ -904,7 +913,7 @@ if ( ! class_exists( 'CustomPress_Content_Types' ) ):
 							}
 
 						}
-						else {
+						else if (!in_array($custom_field['field_id'], array( "Followers_text_2365", "Engagement_text_2863" ))) {
 
 							$pricingdtls .= $fmt['open_line'];
 							$pricingdtls .= $fmt['open_title'];

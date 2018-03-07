@@ -9161,7 +9161,7 @@ function nice_number($atts) {
 
     return number_format($number, 2, '.', ',');
 }
-add_shortcode( 'nice_number', 'count_total_fw' );
+add_shortcode( 'nice_number', 'nice_number' );
 /** [total_fw] shortcode */
 function count_total_fw(){
 	$products = get_posts( array(
@@ -9171,7 +9171,7 @@ function count_total_fw(){
         ));
 	$total_fw = 0;
 	foreach ($products as $product)
-		$total_fw += intval(get_post_meta($product->ID, '_price', true));
+		$total_fw += intval(get_post_meta($product->ID, 'ct_Followers_text_2365', true));
 	return nice_number(array('number' => $total_fw));
 }
 add_shortcode( 'total_fw', 'count_total_fw' );
