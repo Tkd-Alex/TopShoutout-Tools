@@ -19,7 +19,8 @@ class Endpoint:
                 request.form['thumbnail_id'], 
                 request.form['product_image_gallery']) 
             ))
-            curs.commit()
+            conn.commit()
+            conn.close()
             try:
                 _thread.start_new_thread( 
                     functions.fetchInstagramInfo, 
@@ -56,7 +57,8 @@ class Endpoint:
                     ))
                 else:
                     return status, message
-            curs.commit()
+            conn.commit()
+            conn.close()
             return True, "Influencer has been updated"
 
     def deleteInfluencer(self, request):
@@ -66,4 +68,6 @@ class Endpoint:
         igname = curs.fetchone
         if igname != None:
             curs.execute((query.DELETE_INFLUENCER % (int(request.form['post_id'])) ))
-            curs.commit()
+            conn.commit()
+            conn.close()
+            return True, "Influencer has been deleted"
