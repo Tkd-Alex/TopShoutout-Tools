@@ -3,10 +3,11 @@ importer/xls/*
 importer/*.txt
 crawler/image
 crawler/image/*
-crawler/*.txt
 crawler/*.json
 crawler/*.db
 crawler/__pycache__
 crawler/__pycache__/*
 crawler/logs
 crawler/logs/*
+crawler/env
+crawler/env/*
