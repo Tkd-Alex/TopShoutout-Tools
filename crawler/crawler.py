@@ -4,7 +4,7 @@ import sys, os, glob, json
 import pandas as pd
 from pprint import pprint
 from flask import Flask, request, Response
-
+from datetime import datetime
 from wordpress import Wordpress
 from endpoint import Endpoint
 
@@ -17,6 +17,11 @@ def newInfluencer():
     status, message = endpoint.newInfluencer(request)
     js = json.dumps({ 'result': status, 'message': message})
     return Response(js, status=200, mimetype='application/json')
+
+@app.route('/',  methods=['GET', 'POST'])
+def hello():
+    message = "TopShoutout-Api Working on: {}".format(datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+    return Response(message, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     if not os.path.exists('image'):
