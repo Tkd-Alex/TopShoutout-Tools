@@ -3,7 +3,9 @@ UPDATE_THUMBNAIL = "UPDATE wppt_postmeta SET meta_value = '%s' WHERE meta_key = 
 UPDATE_IMG_GALLERY = "UPDATE wppt_postmeta SET meta_value = '%s' WHERE meta_key = '_product_image_gallery' AND post_id = '%s' "
 UPDATE_FOLLOWER = "UPDATE wppt_postmeta SET meta_value = '%s' WHERE meta_key = 'ct_Followers_text_2365' AND post_id = '%s' "
 UPDATE_ENGAGEMENT_RATE = "UPDATE wppt_postmeta SET meta_value = '%s' WHERE meta_key = 'ct_Engagement_text_2863' AND post_id = '%s' "
-UPDATE_POST_INFO = "UPDATE wppt_posts SET post_status = 'publish', post_modified = '%s', post_modified_gmt = '%s', post_status='publish' WHERE ID = '%s' "
+UPDATE_POST_INFO = "UPDATE wppt_posts SET post_modified = '%(today)s', post_modified_gmt = '%(today)s', post_status='publish', guid = '%(guid)s', post_name = '%(post_name)s' WHERE ID = '%(post_id)s' "
+
+GET_POST_TITLE = "SELECT post_title FROM wppt_posts WHERE ID = '%s' "
 
 #SQL LITE QUERY
 INIT_TABLE = '''CREATE TABLE IF NOT EXISTS influencers ( ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, POST_ID INTEGER UNIQUE NOT NULL, IG_NAME CHAR(255) NOT NULL, THUMB_ID CHAR(50), GALLERY_IDS CHAR(50) );'''

@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, os, glob, requests, shutil, pymysql, query
+import sys, os, glob, requests, shutil, pymysql, query, functions
 from pprint import pprint
+from slugify import slugify
 from datetime import date, datetime, timedelta
 
 class Wordpress:
@@ -41,6 +42,7 @@ class Wordpress:
                                 'Content-Type': 'image/jpg',
                                 'Content-Disposition' : 'attachment; filename=%s'% filename
                             })
+        os.remove('image/{}'.format(image))
         return res.json()['id']
 
     def updateUserWP(self, post_id, imageids, nfollower, averangelikes):
@@ -54,7 +56,6 @@ class Wordpress:
 
         imageids = ','.join([str(x) for x in imageids[-4:]])
         cursor.execute((query.UPDATE_IMG_GALLERY % (imageids, post_id) ))
-
         
         cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
 
@@ -62,6 +63,13 @@ class Wordpress:
         cursor.execute((query.UPDATE_ENGAGEMENT_RATE % (engagementrate, post_id) ))
         
         today = datetime.now().date()
-        cursor.execute((query.UPDATE_POST_INFO % (today, today, post_id) ))
         
+        cursor.execute((query.GET_POST_TITLE) % post_id)
+        post_title = cursor.fetchone()
+        if post_title != None:
+            post_name = slugify(str(post_title))
+        
+        guid = '{}/product/{}'.format(self.wpconfig['host'], post_name)
+
+        cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
