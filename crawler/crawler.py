@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, json
+import sys, os, glob, json, configparser
 import pandas as pd
 from pprint import pprint
 from flask import Flask, request, Response
@@ -29,9 +29,13 @@ if __name__ == '__main__':
     if not os.path.exists('logs'):
         os.makedirs('logs')
 
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
     wpapi = Wordpress(
-        wp_usr="TopShoutout", wp_psw="TopShoutout123!!", wp_host="http://localhost/topshoutup",
-        db_usr="root", db_psw="root", db_host="localhost", db_name="topshoutout"
+        wp_usr=config.get('wordpress','username'), wp_psw=config.get('wordpress','password'), wp_host=config.get('wordpress','host'),
+        db_usr=config.get('database','username'), db_psw=config.get('database','password'), db_host=config.get('database','host'), db_name=config.get('database','name')
     )
     endpoint = Endpoint( sqllite="influencer.db", wpapi=wpapi )
     app.run(host='0.0.0.0', port=6565, threaded=True)
+    

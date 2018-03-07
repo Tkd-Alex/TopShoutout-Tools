@@ -11,3 +11,4 @@ crawler/logs
 crawler/logs/*
 crawler/env
 crawler/env/*
+crawler/config.ini

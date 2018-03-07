@@ -1,0 +1,9 @@
+[wordpress]
+username =
+password =
+host =  
+[database]
+username = 
+password = 
+host =
+name =
