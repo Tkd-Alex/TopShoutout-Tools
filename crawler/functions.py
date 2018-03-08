@@ -11,16 +11,16 @@ def writeError(error):
         _file.write("{}\n".format(error))
 
 def downloadImage(imgurl, filename):
-    try:
-        response = requests.get(imgurl, stream=True)
-        if response.status_code == 200:
-            with open('image/{}'.format(filename), 'wb') as out_file:
-                shutil.copyfileobj(response.raw, out_file)
-                return filename
-        else:
-            writeError("Cannot download image, response status: {}\nUrl image: {}".format(response.status_code, imgurl))
-    except Exception as e:
-        writeError(e)
+    #try:
+    response = requests.get(imgurl, stream=True)
+    if response.status_code == 200:
+        with open('image/{}'.format(filename), 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+            return filename
+    else:
+        writeError("Cannot download image, response status: {}\nUrl image: {}".format(response.status_code, imgurl))
+    #except Exception as e:
+    #    writeError(e)
 
 def isInstagramValid(username):
     url = "https://www.instagram.com/{}/?__a=1".format(username.strip().replace('@',''))
@@ -47,29 +47,29 @@ def fetchInstagramInfo(user, wpapi):
     res = requests.get(url, stream=True)
     
     if res.status_code == 200:
-        try: 
-            json = res.json()['user']
-            if json['is_private'] == False:
-                nfollower = json['followed_by']['count']
-                imgurls = []
-                
-                sumlikes = 0
-                for media in json['media']['nodes'][:12]:
-                    sumlikes += int(media['likes']['count'])
-                
-                averangelikes = float(int(sumlikes) / 12)
-                
-                for media in json['media']['nodes'][:5]:
-                    url = media['thumbnail_src']
-                    filename = 'MEDIA_BOT_{}.jpg'.format(media['id'])
-                    imgurls.append(downloadImage(url, filename))
-                
-                imgids = Parallel(n_jobs=3, backend="threading")(delayed(wpapi.uploadImage)(imgurl) for imgurl in imgurls)
-                wpapi.updateUserWP(post_id, imgids, nfollower, averangelikes)
-            else:
-                with open('privatepage.txt', 'a') as privatefile:
-                    privatefile.write("{}\n".format(url))
-        except Exception as e:
-            writeError(e)
+        #try: 
+        json = res.json()['user']
+        if json['is_private'] == False:
+            nfollower = json['followed_by']['count']
+            imgurls = []
+            
+            sumlikes = 0
+            for media in json['media']['nodes'][:12]:
+                sumlikes += int(media['likes']['count'])
+            
+            averangelikes = float(int(sumlikes) / 12)
+            
+            for media in json['media']['nodes'][:5]:
+                url = media['thumbnail_src']
+                filename = 'MEDIA_BOT_{}.jpg'.format(media['id'])
+                imgurls.append(downloadImage(url, filename))
+            
+            imgids = Parallel(n_jobs=3, backend="threading")(delayed(wpapi.uploadImage)(imgurl) for imgurl in imgurls)
+            wpapi.updateUserWP(post_id, imgids, nfollower, averangelikes)
+        else:
+            with open('privatepage.txt', 'a') as privatefile:
+                privatefile.write("{}\n".format(url))
+        #except Exception as e:
+        #    writeError(e)
     else:
         writeError("Request error, response status: {}\nUrl: {}".format(res.status_code, url))
