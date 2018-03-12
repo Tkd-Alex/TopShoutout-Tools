@@ -622,7 +622,6 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
 
             // save any custom taxonomies
             $woo_attr = array();
-
             foreach ( $taxonomy_vars as $taxonomy ) {
                 if ( isset( $_POST[$taxonomy['name']] ) ) {
 
@@ -635,7 +634,6 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                         }
 
                         if ( $taxonomy['type'] == 'text' ) {
-
                             $hierarchical = array_map( 'trim', array_map( 'strip_tags', explode( ',', $_POST[$taxonomy['name']] ) ) );
 
                             wp_set_object_terms( $post_id, $hierarchical, $taxonomy['name'] );
@@ -645,7 +643,6 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                                 $woo_attr[sanitize_title( $taxonomy['name'] )] = $this->woo_attribute( $taxonomy );
                             }
                         } else {
-
                             if ( is_taxonomy_hierarchical( $taxonomy['name'] ) ) {
                                 wp_set_post_terms( $post_id, $_POST[$taxonomy['name']], $taxonomy['name'] );
 
@@ -656,7 +653,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                             } else {
                                 if ( $tax ) {
                                     $non_hierarchical = array();
-
+                                    
                                     foreach ( $tax as $value ) {
                                         $term = get_term_by( 'id', $value, $taxonomy['name'] );
                                         if ( $term && !is_wp_error( $term ) ) {
@@ -664,7 +661,10 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                                         }
                                     }
 
-                                    wp_set_post_terms( $post_id, $non_hierarchical, $taxonomy['name'] );
+                                    if(isset($_POST['new_niche']) && $_POST['new_niche'] != "")
+                                        wp_set_post_terms( $post_id, $_POST['new_niche'], $taxonomy['name'] );
+                                    else
+                                        wp_set_post_terms( $post_id, $non_hierarchical, $taxonomy['name'] );
 
                                     // woocommerce check
                                     if ( isset( $taxonomy['woo_attr'] ) && $taxonomy['woo_attr'] == 'yes' && !empty( $_POST[$taxonomy['name']] ) ) {
@@ -994,9 +994,15 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
         }
 
         // save all custom fields
-        foreach ( $meta_key_value as $meta_key => $meta_value )
-            update_post_meta( $post_id, $meta_key, $meta_value );
-
+        foreach ( $meta_key_value as $meta_key => $meta_value ){
+            // If the meta_key is a new niche create taxonomy
+            if($meta_key !== "new_niche") update_post_meta( $post_id, $meta_key, $meta_value ); 
+            else{
+                $term = term_exists($meta_value, "niche"); 
+                if($term !== 0 && $term !== null ) wp_insert_term( $meta_value, "niche");
+            } 
+        }
+        
         // save any multicolumn repeatable fields
         foreach ( $multi_repeated as $repeat_key => $repeat_value ) {
             // first, delete any previous repeatable fields
