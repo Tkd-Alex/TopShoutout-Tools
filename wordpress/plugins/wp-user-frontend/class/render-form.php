@@ -171,7 +171,7 @@ class WPUF_Render_Form {
                 continue;
             }
 
-            //separate the post and custom fields
+            //separate the post and custom fields 
             if ( isset( $value['is_meta'] ) && $value['is_meta'] == 'yes' ) {
                 $meta_vars[] = $value;
                 continue;
@@ -397,7 +397,9 @@ class WPUF_Render_Form {
         $class_name    = !empty( $form_field['css'] ) ? ' ' . $form_field['css'] : '';
         $field_size    = !empty( $form_field['width'] ) ? ' field-size-' . $form_field['width'] : '';
 
-        printf( '<li class="wpuf-el %s%s%s" data-label="%s">', $el_name, $class_name, $field_size, $form_field['label'] );
+        $el_custom_id  = !empty( $form_field['name'] ) ? "id_".$form_field['name'] : '';
+
+        printf( '<li class="wpuf-el %s%s%s" data-label="%s" id="%s">', $el_name, $class_name, $field_size, $form_field['label'], $el_custom_id );
 
         if ( isset( $form_field['input_type'] ) && !in_array( $form_field['input_type'], $label_exclude ) ) {
             $this->label( $form_field, $post_id );
@@ -441,6 +443,29 @@ class WPUF_Render_Form {
         </script>
         <?php
     }
+
+    /* Custom conditional login */
+    function hide_niche(){
+        ?>
+        <script type="text/javascript">
+            var display = 'none';
+            var radio = document.getElementsByName('br_page_type');
+            var niche = document.getElementById('id_niche');
+            var new_niche = document.getElementById('id_new_niche');
+            niche.style.display = display;
+            new_niche.style.display = display;
+            for(var i=0; i<radio.length; i++){
+                radio[i].onclick = function(){
+                    if(this.value == "fun_page") display = 'block';
+                    else display = 'none';
+                    niche.style.display = display;
+                    new_niche.style.display = display;
+                }
+            } 
+        </script>
+        <?php
+    }
+
 
     /**
      * Render form items
@@ -618,7 +643,6 @@ class WPUF_Render_Form {
                     break;
 
                 case 'taxonomy':
-
                     $this->taxonomy( $form_field, $post_id, $form_id );
                     $this->conditional_logic( $form_field, $form_id );
                     break;
@@ -661,9 +685,9 @@ class WPUF_Render_Form {
             }
 
 
-            $this->render_item_after( $form_field );
+            $this->render_item_after( $form_field );    
         } //end foreach
-
+        $this->hide_niche();
         if ( $hidden_fields ) {
             foreach($hidden_fields as $field) {
                 printf( '<input type="hidden" name="%s" value="%s">', esc_attr( $field['name'] ), esc_attr( $field['meta_value'] ) );
