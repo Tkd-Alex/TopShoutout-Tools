@@ -661,7 +661,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                                         }
                                     }
 
-                                    if(isset($_POST['new_niche']) && $_POST['new_niche'] != "")
+                                    if(isset($_POST['new_niche']) && $_POST['new_niche'] != "" && $taxonomy['name'] == "niche")
                                         wp_set_post_terms( $post_id, $_POST['new_niche'], $taxonomy['name'] );
                                     else
                                         wp_set_post_terms( $post_id, $non_hierarchical, $taxonomy['name'] );
