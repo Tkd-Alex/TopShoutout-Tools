@@ -445,16 +445,21 @@ class WPUF_Render_Form {
     }
 
     /* Custom conditional login */
-    function hide_niche(){
+    function manage_niche(){
         ?>
         <script type="text/javascript">
+
             var display = 'none';
             var radio = document.getElementsByName('br_page_type');
             var niche = document.getElementById('id_niche');
             var new_niche = document.getElementById('id_new_niche');
-            niche.style.display = display;
-            new_niche.style.display = display;
+
             for(var i=0; i<radio.length; i++){
+                if(radio[i].checked == true && radio[i].value == "fun_page") display = 'block';
+
+                niche.style.display = display;
+                new_niche.style.display = display;
+
                 radio[i].onclick = function(){
                     if(this.value == "fun_page") display = 'block';
                     else display = 'none';
@@ -462,6 +467,28 @@ class WPUF_Render_Form {
                     new_niche.style.display = display;
                 }
             } 
+            
+            var input_new_niche = new_niche.getElementsByTagName('input')
+            var disabled = false
+
+            var niche_array = document.getElementById('niche[]');
+            if(niche_array.value != -1) disabled = true;
+            else disabled = false;
+
+            for(var i=0; i<input_new_niche.length; i++){
+                input_new_niche[i].disabled = disabled;
+                if(disabled) input_new_niche[i].value = "";
+            }
+
+            niche_array.onchange = function(){
+                if(this.value != -1) disabled = true;
+                else disabled = false;
+
+                for(var i=0; i<input_new_niche.length; i++){
+                    input_new_niche[i].disabled = disabled;
+                    if(disabled) input_new_niche[i].value = "";
+                }   
+            }
         </script>
         <?php
     }
@@ -687,7 +714,7 @@ class WPUF_Render_Form {
 
             $this->render_item_after( $form_field );    
         } //end foreach
-        $this->hide_niche();
+        $this->manage_niche();
         if ( $hidden_fields ) {
             foreach($hidden_fields as $field) {
                 printf( '<input type="hidden" name="%s" value="%s">', esc_attr( $field['name'] ), esc_attr( $field['meta_value'] ) );
@@ -942,7 +969,7 @@ class WPUF_Render_Form {
         ?>
 
         <div class="wpuf-fields">
-            <input class="textfield<?php echo $this->required_class( $attr );  echo ' wpuf_'.$attr['name'].'_'.$form_id; ?>" id="<?php echo $attr['name'].'_'.$form_id; ?>" type="text" data-required="<?php echo $attr['required'] ?>" data-type="text"<?php $this->required_html5( $attr ); ?> name="<?php echo esc_attr( $attr['name'] ); ?>" placeholder="<?php echo esc_attr( $attr['placeholder'] ); ?>" value="<?php echo esc_attr( $value ) ?>" size="<?php echo esc_attr( $attr['size'] ) ?>" <?php echo $username ? 'disabled' : ''; ?> />
+            <input class="textfield<?php echo $this->required_class( $attr );  echo ' wpuf_'.$attr['name'].'_'.$form_id; ?>" id="<?php echo $attr['name'].'_'.$form_id; ?>" type="text" data-required="<?php echo $attr['required'] ?>" data-type="text"<?php $this->required_html5( $attr ); ?> name="<?php echo esc_attr( $attr['name'] ); ?>" placeholder="<?php echo esc_attr( $attr['placeholder'] ); ?>" value="<?php echo esc_attr( $value ) ?>" size="<?php echo esc_attr( $attr['size'] ) ?>" <?php echo $username ? 'disabled' : ''; ?> <?php echo ( $post_id && esc_attr( $attr['name'] ) == "ct_Instagram__text_846a" )  ? 'readonly' : ''; ?> />
             <span class="wpuf-wordlimit-message wpuf-help"></span>
             <?php $this->help_text( $attr ); ?>
 
