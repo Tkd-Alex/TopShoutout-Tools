@@ -6,10 +6,7 @@ UPDATE_ENGAGEMENT_RATE = "UPDATE wppt_postmeta SET meta_value = '%s' WHERE meta_
 UPDATE_POST_INFO = "UPDATE wppt_posts SET post_modified = '%(today)s', post_modified_gmt = '%(today)s', post_status='publish', guid = '%(guid)s', post_name = '%(post_name)s' WHERE ID = '%(post_id)s' "
 
 GET_POST_TITLE = "SELECT post_title FROM wppt_posts WHERE ID = '%s' "
+GET_IMAGE_ID = "SELECT meta_value, meta_key FROM wppt_postmeta WHERE ( meta_key = '_product_image_gallery' OR meta_key = '_thumbnail_id' ) AND post_id = '%s' "
+GET_IMAGE_TITLE = "SELECT ID, post_title FROM wppt_posts WHERE post_type = 'attachment' AND ID IN ( %s )"
 
-#SQL LITE QUERY
-INIT_TABLE = '''CREATE TABLE IF NOT EXISTS influencers ( ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, POST_ID INTEGER UNIQUE NOT NULL, IG_NAME CHAR(255) NOT NULL, THUMB_ID CHAR(50), GALLERY_IDS CHAR(50) );'''
-NEW_INFLUENCER = "INSERT INTO influencers (POST_ID, IG_NAME, THUMB_ID, GALLERY_IDS) VALUES (%d, '%s', '%s', '%s' )"
-UPDATE_INFLUENCER = "UPDATE influencers SET IG_NAME, THUMB_ID, GALLERY_IDS VALUES (%d, '%s', '%s') WHERE POST_ID = '%s' "
-DELETE_INFLUENCER = "DELETE FROM influencers WHERE POST_ID = '%s' "
-GET_IGNAME = "SELECT IG_NAME FROM influencers WHERE POST_ID = '%s' "
+GET_INSTAGRAM_PAGE = "SELECT wppt_posts.ID, wppt_postmeta.meta_value FROM wppt_posts INNER JOIN wppt_postmeta ON wppt_posts.ID = wppt_postmeta.post_id WHERE wppt_posts.post_type = 'product' AND wppt_posts.post_status = 'publish' AND wppt_postmeta.meta_key = 'ct_Instagram__text_846a' "
