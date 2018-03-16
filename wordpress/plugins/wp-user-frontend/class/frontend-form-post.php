@@ -782,33 +782,28 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 do_action( 'wpuf_add_post_after_insert', $post_id, $form_id, $form_settings, $form_vars ); // plugin API to extend the functionality
             }
 
-            // Here contact python api with IG name and $post_id
-            $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
-            $product_image_gallery = get_post_meta($post_id, '_product_image_gallery', true);
+            if(!$is_update){
+                // Here contact python api with IG name and $post_id
+                $url = 'http://'.PYTHON_API_ADDRESS.':'.PYTHON_API_PORT. ($is_update ? '/update' : '/new');
+                $data = array(
+                    'post_id' => $post_id, 
+                    'ig_name' => $_POST['ct_Instagram__text_846a']
+                );
 
-            if($thumbnail_id == "") add_post_meta( $post_id, '_thumbnail_id', '' );
-            
-            $url = 'http://'.PYTHON_API_ADDRESS.':'.PYTHON_API_PORT. ($is_update ? '/update' : '/new');
-            $data = array(
-                'post_id' => $post_id, 
-                'ig_name' => $_POST['ct_Instagram__text_846a'],
-                'thumbnail_id' => $thumbnail_id, 
-                'product_image_gallery' => $product_image_gallery
-            );
+                $options = array(
+                  'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data),
+                  ),
+                );
+                $context  = stream_context_create($options);
+                $result = file_get_contents($url, false, $context);
+                $result = json_decode($result, true);
 
-            $options = array(
-              'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data),
-              ),
-            );
-            $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
-            $result = json_decode($result, true);
-
-            $response['message'] = $result['message'];
-            $response['pythonapi'] = ($result['result'] == "True" ? true : false);
+                $response['message'] = $result['message'];
+                $response['pythonapi'] = ($result['result'] == "True" ? true : false);
+            }
 
             wpuf_clear_buffer();
             wp_send_json( $response );
