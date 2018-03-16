@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, requests, shutil, random
+import sys, os, glob, requests, shutil, random, schedule, time
 from pprint import pprint
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
@@ -27,7 +27,7 @@ def isInstagramValid(username):
     res = requests.get(url, stream=True)
     if res.status_code == 200:
         try:
-            json = res.json()['user']
+            json = res.json()['graphql']['user']
             if json['is_private'] == True:
                 return False, "The {} page it does not seem to be public.".format(username)
         except Exception as error:
@@ -48,21 +48,23 @@ def fetchInstagramInfo(user, wpapi):
     
     if res.status_code == 200:
         #try: 
-        json = res.json()['user']
+        json = res.json()['graphql']['user']
         if json['is_private'] == False:
-            nfollower = json['followed_by']['count']
+            nfollower = json['edge_followed_by']['count']
             imgurls = []
             
             sumlikes = 0
-            for media in json['media']['nodes'][:12]:
-                sumlikes += int(media['likes']['count'])
+            for media in json['edge_owner_to_timeline_media']['edges'][:12]:
+                sumlikes += int(media['node']['edge_liked_by']['count'])
             
             averangelikes = float(int(sumlikes) / 12)
             
-            for media in json['media']['nodes'][:5]:
-                url = media['thumbnail_src']
-                filename = 'MEDIA_BOT_{}.jpg'.format(media['id'])
-                imgurls.append(downloadImage(url, filename))
+            for media in json['edge_owner_to_timeline_media']['edges'][:5]:
+                url = media['node']['thumbnail_src']
+                filename = 'MEDIA_BOT_{}.jpg'.format(media['node']['id'])
+                img_already_exist = wpapi.getImageAlreadyUpload(post_id)
+                if not filename in img_already_exist: 
+                    imgurls.append(downloadImage(url, filename))
             
             imgids = Parallel(n_jobs=3, backend="threading")(delayed(wpapi.uploadImage)(imgurl) for imgurl in imgurls)
             wpapi.updateUserWP(post_id, imgids, nfollower, averangelikes)
@@ -73,3 +75,19 @@ def fetchInstagramInfo(user, wpapi):
         #    writeError(e)
     else:
         writeError("Request error, response status: {}\nUrl: {}".format(res.status_code, url))
+
+def _schedulingUpdateUser(wpapi):
+    instagram_pages = wpapi.getInstagramPage()
+    today_numer = time.strftime("%w")
+    # Split all page in day numbers group.
+    group_select = int(len(instagram_pages) / 7)
+    _max = int(today_numer) * group_select - 1
+    _min = _max - group_select + 1
+    for ig_page in instagram_pages[_min:_max]:
+        fetchInstagramInfo( { 'username': ig_page[1], 'post_id': ig_page[0] } , wpapi)
+
+def schedulingUpdateUser(wpapi):
+    schedule.every().day.at("12:33").do(_schedulingUpdateUser (wpapi) )
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
