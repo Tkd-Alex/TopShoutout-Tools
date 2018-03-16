@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import sys, os, glob, json, configparser, query, sqlite3
+import sys, os, glob, json, configparser, query, _thread, functions
 import pandas as pd
 from pprint import pprint
 from flask import Flask, request, Response
@@ -18,18 +18,6 @@ def newInfluencer():
     js = json.dumps({ 'result': status, 'message': message })
     return Response(js, status=200, mimetype='application/json')
 
-@app.route('/update', methods=['POST'])
-def updateInfluencer():
-    status, message = endpoint.updateInfluencer(request)
-    js = json.dumps({ 'result': status, 'message': message })
-    return Response(js, status=200, mimetype='application/json')
-
-@app.route('/delete', methods=['POST'])
-def deleteInfluencer():
-    status, message = endpoint.deleteInfluencer(request)
-    js = json.dumps({ 'result': status, 'message': message })
-    return Response(js, status=200, mimetype='application/json')
-
 @app.route('/',  methods=['GET', 'POST'])
 def hello():
     message = "TopShoutout-Api Working on: {}".format(datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
@@ -44,13 +32,16 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    conn = sqlite3.connect("influencer.db")
-    conn.execute(query.INIT_TABLE)
-
     wpapi = Wordpress(
         wp_usr=config.get('wordpress','username'), wp_psw=config.get('wordpress','password'), wp_host=config.get('wordpress','host'),
         db_usr=config.get('database','username'), db_psw=config.get('database','password'), db_host=config.get('database','host'), db_name=config.get('database','name')
     )
-    endpoint = Endpoint( sqllite="influencer.db", wpapi=wpapi )
-    app.run(host='0.0.0.0', port=6565, threaded=True)
+    endpoint = Endpoint( wpapi=wpapi )
+    
+    #try:
+    #    _thread.start_new_thread( functions.schedulingUpdateUser, (wpapi, ) )
+    #except:
+    #    print ("Error: unable to start thread")
+
+    app.run(host='0.0.0.0', port=6565, threaded=True, debug=True)
     
