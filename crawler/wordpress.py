@@ -45,16 +45,79 @@ class Wordpress:
         os.remove('image/{}'.format(image))
         return res.json()['id']
 
+    def getInstagramPage(self):
+        cnx = pymysql.connect(
+            user=self.dbconfig['user'], password=self.dbconfig['password'], 
+            host=self.dbconfig['host'], database=self.dbconfig['database']
+        )
+        cursor = cnx.cursor()
+        cursor.execute(( query.GET_INSTAGRAM_PAGE ))
+        ig_pages = cursor.fetchall()
+        return ig_pages
+
+    def getImageAlreadyUpload(self, post_id):
+        cnx = pymysql.connect(
+            user=self.dbconfig['user'], password=self.dbconfig['password'], 
+            host=self.dbconfig['host'], database=self.dbconfig['database']
+        )
+        cursor = cnx.cursor()
+        
+        cursor.execute((query.GET_IMAGE_ID % (post_id) ))
+        image_ids = cursor.fetchall()
+        ids = []
+        for img in image_ids:
+            if ',' in img[0] and img[0] != '':
+                ids += img[0].split(',')
+            elif img[0] != '':
+                ids.append(img[0])
+        
+        titles = []
+        if len(ids) > 0:
+            cursor.execute( (query.GET_IMAGE_TITLE % (','.join([str(x) for x in ids])) ) )
+            image_titles = cursor.fetchall()
+            for title in image_titles:
+                titles.append(title[1]) 
+
+        return titles
+
     def updateUserWP(self, post_id, imageids, nfollower, averangelikes):
         cnx = pymysql.connect(
             user=self.dbconfig['user'], password=self.dbconfig['password'], 
             host=self.dbconfig['host'], database=self.dbconfig['database']
         )
         cursor = cnx.cursor()
+        
+        # Get all image alredy setted
+        cursor.execute((query.GET_IMAGE_ID % (post_id) ))
+        image_ids = cursor.fetchall()
 
-        cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+        saved_ids = []
 
-        imageids = ','.join([str(x) for x in imageids[-4:]])
+        for img in image_ids:
+            if img[0] != '':
+                cursor.execute((query.GET_IMAGE_TITLE % (img[0]) ))
+                if img[1] == '_thumbnail_id': # If the image is thumbnail
+                    image_title = cursor.fetchone()
+                    if image_title != None: # Exist
+                        if 'MEDIA_BOT' in image_title[1]: # Is upload by bot can be update.
+                            print("Updated thumbail")
+                            cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+                else: # Image is in gallery
+                    image_titles = cursor.fetchall()
+                    for img_title in image_titles:
+                        if not 'MEDIA_BOT' in img_title[1]:
+                            print("This is ID must be saved {}".format(image_title[0]))
+                            saved_ids.append(img_title[0])
+                        else:
+                            print("Can be delete: {}".format(img_title[0]))
+            else:
+                cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+        
+        if len(saved_ids) < 4: # If saved ids are less that four concat this id with our uploaded
+            imageids = saved_ids + imageids[ : ( 4-len(saved_ids )) ]
+        
+        img_ids = ','.join([str(x) for x in imageids])
+        print("Update img gallery: {}".format(img_ids))
         cursor.execute((query.UPDATE_IMG_GALLERY % (imageids, post_id) ))
         
         cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
@@ -75,3 +138,5 @@ class Wordpress:
 
         cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
+        print("Update finish")
+        
