@@ -12,3 +12,7 @@ crawler/logs/*
 crawler/env
 crawler/env/*
 crawler/config.ini
+crawler/privatepage.txt
+crawler/urlerror.txt
+crawler/.vscode
+crawler/.vscode/*
