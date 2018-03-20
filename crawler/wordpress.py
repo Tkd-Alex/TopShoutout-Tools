@@ -94,7 +94,6 @@ class Wordpress:
         saved_ids = []
 
         for img in image_ids:
-            pprint(img)
             if img[0] != '':
                 cursor.execute((query.GET_IMAGE_TITLE % (img[0]) ))
                 if img[1] == '_thumbnail_id': # If the image is thumbnail
@@ -108,15 +107,13 @@ class Wordpress:
                         if not 'MEDIA_BOT' in img_title[1]:
                             saved_ids.append(img_title[0])
             else:
-                print("Update thumbnail {}".format(imageids[0]))
                 cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
         
         if len(saved_ids) < 4: # If saved ids are less that four concat this id with our uploaded
             imageids = saved_ids + imageids[ : ( 4-len(saved_ids )) ]
         
         img_ids = ','.join([str(x) for x in imageids])
-        print("Update with string: {}".format(img_ids))
-        cursor.execute((query.UPDATE_IMG_GALLERY % (imageids, post_id) ))
+        cursor.execute((query.UPDATE_IMG_GALLERY % (img_ids, post_id) ))
         
         cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
 
