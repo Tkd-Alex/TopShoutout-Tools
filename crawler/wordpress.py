@@ -117,7 +117,7 @@ class Wordpress:
             imageids = saved_ids + imageids[ : ( 4-len(saved_ids )) ]
         
         img_ids = ','.join([str(x) for x in imageids])
-		#cursor.execute((query.UPDATE_IMG_GALLERY % (img_ids, post_id) ))
+        #cursor.execute((query.UPDATE_IMG_GALLERY % (img_ids, post_id) ))
         #cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
 
         engagementrate = str(round(float( averangelikes / int(nfollower) ) * 100, 2)) 
@@ -140,9 +140,9 @@ class Wordpress:
         cursor.execute((query.UPDATE_POST_INFO % ({'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
         
-		r = requests.post(self.wpconfig['host'] + "/update_tax_count.php", data=data)
-		print(r.status_code)
-		print(r.text)
+        r = requests.post(self.wpconfig['host'] + "/update_tax_count.php", data=data)
+        print(r.status_code)
+        print(r.text)
 
         print("[{}] Finish".format(post_id))
         
