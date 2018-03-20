@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, os, glob, requests, shutil, pymysql, query, functions
+import sys, os, glob, requests, shutil, pymysql, query, functions, subprocess
 from pprint import pprint
 from slugify import slugify
 from datetime import date, datetime, timedelta
@@ -134,5 +134,6 @@ class Wordpress:
         cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
 
+        subprocess.call("php update_tax_count.php")
         print("[{}] Finish".format(post_id))
         
