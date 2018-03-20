@@ -987,6 +987,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                 update_post_meta( $attachment_id, '_wp_attachment_image_alt', $file_data['title'] );
             }
         }
+        else add_post_meta( $post_id, "_thumbnail_id", ""); 
 
         // save all custom fields
         foreach ( $meta_key_value as $meta_key => $meta_value ){
