@@ -87,6 +87,8 @@ class Wordpress:
         )
         cursor = cnx.cursor()
         
+        data = {}
+
         # Get all image alredy setted
         cursor.execute((query.GET_IMAGE_ID % (post_id) ))
         image_ids = cursor.fetchall()
@@ -100,26 +102,37 @@ class Wordpress:
                     image_title = cursor.fetchone()
                     if image_title != None: # Exist
                         if 'MEDIA_BOT' in image_title[1]: # Is upload by bot can be update.
-                            cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+                            #cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+                            data['_thumbnail_id'] = imageids[0];
                 else: # Image is in gallery
                     image_titles = cursor.fetchall()
                     for img_title in image_titles:
                         if not 'MEDIA_BOT' in img_title[1]:
                             saved_ids.append(img_title[0])
             else:
-                cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+                #cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
+                data['_thumbnail_id'] = imageids[0];
         
         if len(saved_ids) < 4: # If saved ids are less that four concat this id with our uploaded
             imageids = saved_ids + imageids[ : ( 4-len(saved_ids )) ]
         
         img_ids = ','.join([str(x) for x in imageids])
+
+        '''
         cursor.execute((query.UPDATE_IMG_GALLERY % (img_ids, post_id) ))
         
         cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
 
         engagementrate = str(round(float( averangelikes / int(nfollower) ) * 100, 2)) 
         cursor.execute((query.UPDATE_ENGAGEMENT_RATE % (engagementrate, post_id) ))
+        '''
         
+        data['post_id'] = post_id
+        data['ct_Followers_text_2365'] = nfollower
+        data['ct_Engagement_text_2863'] = engagementrate
+        data['_product_image_gallery'] = img_ids
+        
+        '''
         today = datetime.now().date()
         
         cursor.execute((query.GET_POST_TITLE) % post_id)
@@ -133,8 +146,9 @@ class Wordpress:
 
         cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
+        '''
 
-        requests.get(self.wpconfig['host'] + "/update_tax_count.php")
-        
+        requests.post(self.wpconfig['host'] + "/update_tax_count.php", data=data)
+
         print("[{}] Finish".format(post_id))
         
