@@ -134,6 +134,7 @@ class Wordpress:
         cursor.execute((query.UPDATE_POST_INFO % ({'today': today, 'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
 
-        subprocess.call("php update_tax_count.php")
+        requests.get(self.wpconfig['host'] + "/update_tax_count.php")
+        
         print("[{}] Finish".format(post_id))
         
