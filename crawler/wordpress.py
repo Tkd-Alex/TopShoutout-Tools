@@ -140,7 +140,7 @@ class Wordpress:
         cursor.execute((query.UPDATE_POST_INFO % ({'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
         
-        r = requests.post(self.wpconfig['host'] + "/update_tax_count.php", data=data)
+        r = requests.post(self.wpconfig['host'] + "/crawler_update.php", data=data)
         print(r.status_code)
         print(r.text)
 
