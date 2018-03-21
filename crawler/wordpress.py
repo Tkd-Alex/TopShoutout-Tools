@@ -103,22 +103,35 @@ class Wordpress:
                     if image_title != None: # Exist
                         if 'MEDIA_BOT' in image_title[1]: # Is upload by bot can be update.
                             #cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
-                            data['_thumbnail_id'] = imageids[0];
+                            data['_thumbnail_id'] = imageids[0]
+                            del imageids[0]
                 else: # Image is in gallery
                     image_titles = cursor.fetchall()
                     for img_title in image_titles:
                         if not 'MEDIA_BOT' in img_title[1]:
                             saved_ids.append(img_title[0])
-            else:
+            elif img[1] == '_thumbnail_id':
                 #cursor.execute((query.UPDATE_THUMBNAIL % (imageids[0], post_id) ))
-                data['_thumbnail_id'] = imageids[0];
+                data['_thumbnail_id'] = imageids[0]
+                del imageids[0]
         
         if len(saved_ids) < 4: # If saved ids are less that four concat this id with our uploaded
-            imageids = saved_ids + imageids[ : ( 4-len(saved_ids )) ]
+            imageids = saved_ids + imageids[ : ( 5-len(saved_ids )) ]
         
         img_ids = ','.join([str(x) for x in imageids])
         #cursor.execute((query.UPDATE_IMG_GALLERY % (img_ids, post_id) ))
         #cursor.execute((query.UPDATE_FOLLOWER % (nfollower, post_id) ))
+
+        accountsize = {
+            "0 – 50k": { "min": 0, "max": 49999},
+            "50k – 100k": { "min": 50000, "max": 99999},
+            "100k – 500k": { "min": 100000, "max": 499999},
+            "500k – 1m": { "min": 500000, "max": 999999},
+            "1m+": { "min": 1000000, "max": 9999999999},
+        }
+        for size in accountsize:
+            if nfollower => size['min'] and nfollower <= size['max']:
+                data['account_size'] = size
 
         engagementrate = str(round(float( averangelikes / int(nfollower) ) * 100, 2)) 
         #cursor.execute((query.UPDATE_ENGAGEMENT_RATE % (engagementrate, post_id) ))
@@ -140,6 +153,9 @@ class Wordpress:
         cursor.execute((query.UPDATE_POST_INFO % ({'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
         
+        pprint(data)
         r = requests.post(self.wpconfig['host'] + "/crawler_update.php", data=data)
+        print(r.status_code)
+        print(r.text)
         print("[{}] Finish".format(post_id))
         

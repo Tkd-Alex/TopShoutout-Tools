@@ -12,6 +12,8 @@
 	if (isset($_POST['_thumbnail_id']))
 		update_post_meta($_POST['post_id'], '_thumbnail_id', $_POST['_thumbnail_id']);
 
+	wp_set_post_terms( $post_id, $_POST['account_size'], "account_size" );
+
 	wp_publish_post($_POST['post_id']);
 
 	$cat_id = get_cat_ID('Influencer');
