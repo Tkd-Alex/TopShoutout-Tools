@@ -40,6 +40,7 @@ if ( ! $post->post_excerpt ) {
 
 <?php echo do_shortcode('[custom_fields_block]'); ?>
 
+<?php echo do_shortcode('[tax id="page_type" 		before="Page Type: " 		separator=", " after=""]'); ?><br>
 <?php echo do_shortcode('[tax id="niche" 			before="Niche: " 			separator=", " after=""]'); ?>
 <?php echo do_shortcode('[tax id="account_size" 	before="Account Size: " 	separator=", " after=""]'); ?><br>
 <?php echo do_shortcode('[tax id="location" 		before="Location: " 		separator=", " after=""]'); ?><br>
