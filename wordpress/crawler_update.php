@@ -12,14 +12,18 @@
 	if (isset($_POST['_thumbnail_id']))
 		update_post_meta($_POST['post_id'], '_thumbnail_id', $_POST['_thumbnail_id']);
 
-	wp_set_post_terms( $post_id, $_POST['account_size'], "account_size" );
+	wp_set_post_terms( $_POST['post_id'], $_POST['account_size'], "account_size" );
 
+	$term = get_term_by('name', 'Influencer', 'product_cat');
+	wp_set_object_terms($_POST['post_id'], $term->term_id, 'product_cat');
+	
 	wp_publish_post($_POST['post_id']);
 
-	$cat_id = get_cat_ID('Influencer');
-	wp_set_post_categories($_POST['post_id'], $cat_id);
-	
-	$get_terms_args = array('taxonomy' => 'niche','fields' => 'ids','hide_empty' => false);
-    $update_terms = get_terms($get_terms_args);
-    wp_update_term_count_now($update_terms, 'niche');
+	$taxonomys = array('niche', 'location', 'account_size', 'audience_gender', 'page_type');
+	foreach ($taxonomys as $tax) {
+		$get_terms_args = array('taxonomy' => $tax,'fields' => 'ids','hide_empty' => false);
+    	$update_terms = get_terms($get_terms_args);
+    	wp_update_term_count_now($update_terms, $tax);
+	}
+
 ?>
