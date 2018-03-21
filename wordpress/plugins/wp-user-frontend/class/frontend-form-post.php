@@ -665,7 +665,7 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
                                         wp_set_post_terms( $post_id, $_POST['new_niche'], $taxonomy['name'] );
                                     else
                                         wp_set_post_terms( $post_id, $non_hierarchical, $taxonomy['name'] );
-
+                                    
                                     // woocommerce check
                                     if ( isset( $taxonomy['woo_attr'] ) && $taxonomy['woo_attr'] == 'yes' && !empty( $_POST[$taxonomy['name']] ) ) {
                                         $woo_attr[sanitize_title( $taxonomy['name'] )] = $this->woo_attribute( $taxonomy );
@@ -991,12 +991,14 @@ class WPUF_Frontend_Form_Post extends WPUF_Render_Form {
 
         // save all custom fields
         foreach ( $meta_key_value as $meta_key => $meta_value ){
-            // If the meta_key is a new niche create taxonomy
-            if($meta_key !== "new_niche") update_post_meta( $post_id, $meta_key, $meta_value ); 
-            else{
-                $term = term_exists($meta_value, "niche"); 
+        	// If the meta_key is br_page_type set taxonomy
+        	// If the meta_key is a new niche create taxonomy
+        	if($meta_key === "br_page_type") wp_set_post_terms( $post_id, $meta_value, "page_type" );
+        	elseif($meta_key === "new_niche"){
+        		$term = term_exists($meta_value, "niche"); 
                 if($term !== 0 && $term !== null ) wp_insert_term( $meta_value, "niche");
-            } 
+        	}
+        	else update_post_meta( $post_id, $meta_key, $meta_value ); 
         }
         
         // save any multicolumn repeatable fields

@@ -141,8 +141,5 @@ class Wordpress:
         cnx.commit()
         
         r = requests.post(self.wpconfig['host'] + "/crawler_update.php", data=data)
-        print(r.status_code)
-        print(r.text)
-
         print("[{}] Finish".format(post_id))
         
