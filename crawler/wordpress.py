@@ -127,10 +127,10 @@ class Wordpress:
             "50k – 100k": { "min": 50000, "max": 99999},
             "100k – 500k": { "min": 100000, "max": 499999},
             "500k – 1m": { "min": 500000, "max": 999999},
-            "1m+": { "min": 1000000, "max": 9999999999},
+            "1m+": { "min": 1000000, "max": 9999999999}
         }
         for size in accountsize:
-            if nfollower >= size['min'] and nfollower <= size['max']:
+            if nfollower >= accountsize[size]['min'] and nfollower <= accountsize[size]['max']:
                 data['account_size'] = size
 
         engagementrate = str(round(float( averangelikes / int(nfollower) ) * 100, 2)) 
