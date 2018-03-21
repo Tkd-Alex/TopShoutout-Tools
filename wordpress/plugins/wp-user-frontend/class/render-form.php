@@ -455,13 +455,13 @@ class WPUF_Render_Form {
             var new_niche = document.getElementById('id_new_niche');
 
             for(var i=0; i<radio.length; i++){
-                if(radio[i].checked == true && radio[i].value == "fun_page") display = 'block';
+                if(radio[i].checked == true && radio[i].value == "Fun page") display = 'block';
 
                 niche.style.display = display;
                 new_niche.style.display = display;
 
                 radio[i].onclick = function(){
-                    if(this.value == "fun_page") display = 'block';
+                    if(this.value == "Fun page") display = 'block';
                     else display = 'none';
                     niche.style.display = display;
                     new_niche.style.display = display;
