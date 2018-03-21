@@ -38,10 +38,10 @@ if __name__ == '__main__':
     )
     endpoint = Endpoint( wpapi=wpapi )
     
-    #try:
-    #    _thread.start_new_thread( functions.schedulingUpdateUser, (wpapi, ) )
-    #except:
-    #    print ("Error: unable to start thread")
+    try:
+        _thread.start_new_thread( functions.schedulingUpdateUser, (wpapi, ) )
+    except:
+        print ("Error: unable to start thread")
 
     app.run(host='0.0.0.0', port=6565, threaded=True, debug=False)
     

@@ -41,7 +41,7 @@ def isInstagramValid(username):
 
 def fetchInstagramInfo(user, wpapi):
     username = user['username'].strip().replace('@','')
-    post_id = user['post_id'].strip()
+    post_id = user['post_id']
     
     url = "https://www.instagram.com/{}/?__a=1".format(username)
     res = requests.get(url, stream=True)
@@ -83,11 +83,14 @@ def _schedulingUpdateUser(wpapi):
     group_select = int(len(instagram_pages) / 7)
     _max = int(today_numer) * group_select - 1
     _min = _max - group_select + 1
+    print("Today: {}, _max: {}, _min: {}, ig_page: {} / 7: {}".format(today_numer, _max, _min, len(instagram_pages), group_select))
     for ig_page in instagram_pages[_min:_max]:
-        fetchInstagramInfo( { 'username': ig_page[1], 'post_id': ig_page[0] } , wpapi)
+        if ig_page[1] != '' and ig_page[1].startswith('@'):
+            print("[{}] Scheduling update user".format(ig_page[1]))
+            fetchInstagramInfo( { 'username': ig_page[1], 'post_id': ig_page[0] } , wpapi)
 
 def schedulingUpdateUser(wpapi):
-    schedule.every().day.at("12:33").do(_schedulingUpdateUser (wpapi) )
+    schedule.every().day.at("12:30").do(_schedulingUpdateUser, wpapi )
     while True:
         schedule.run_pending()
         time.sleep(1)
