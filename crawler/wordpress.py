@@ -130,7 +130,7 @@ class Wordpress:
             "1m+": { "min": 1000000, "max": 9999999999},
         }
         for size in accountsize:
-            if nfollower => size['min'] and nfollower <= size['max']:
+            if nfollower >= size['min'] and nfollower <= size['max']:
                 data['account_size'] = size
 
         engagementrate = str(round(float( averangelikes / int(nfollower) ) * 100, 2)) 
@@ -152,7 +152,7 @@ class Wordpress:
 
         cursor.execute((query.UPDATE_POST_INFO % ({'guid': guid, 'post_name': post_name, 'post_id': post_id}) ))
         cnx.commit()
-        
+
         pprint(data)
         r = requests.post(self.wpconfig['host'] + "/crawler_update.php", data=data)
         print(r.status_code)
